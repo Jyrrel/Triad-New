@@ -61,6 +61,10 @@ if ($method === 'POST') {
             echo json_encode(['success' => false, 'message' => 'Invalid restock data.']);
             $db->close(); exit;
         }
+        if ($cost < 0) {
+            echo json_encode(['success' => false, 'message' => 'Unit cost cannot be negative.']);
+            $db->close(); exit;
+        }
 
         // Update qty and cost
         if ($cost > 0) {

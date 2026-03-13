@@ -2917,6 +2917,7 @@ function saveModal(){
   const unit=document.getElementById('mUnit').value.trim()||'pcs';
   const price=parseFloat(document.getElementById('mPrice').value)||0;
   if(!name){toast('⚠ Product name required');return;}
+  if(price < 0){toast('⚠ Selling price cannot be negative.');document.getElementById('mPrice').focus();return;}
   if(editingId){
     const p=byId(editingId);
     addAudit(`Edited: ${p.name}`,'edit');

@@ -90,6 +90,15 @@ if ($method === 'POST') {
             $db->close(); exit;
         }
 
+        foreach ($items as $item) {
+            $qtyCheck = intval($item['qty'] ?? 0);
+            $priceCheck = floatval($item['price'] ?? -1);
+            if ($qtyCheck <= 0 || $priceCheck < 0) {
+                echo json_encode(['success' => false, 'message' => 'Order contains invalid quantity or price.']);
+                $db->close(); exit;
+            }
+        }
+
         $db->begin_transaction();
         try {
             // Insert sale
