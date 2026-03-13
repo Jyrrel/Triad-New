@@ -65,6 +65,10 @@ if ($method === 'POST') {
         $description = trim($body['description'] ?? '');
 
         if (!$name) { echo json_encode(['success' => false, 'message' => 'Item name required.']); $db->close(); exit; }
+        if ($price < 0) { echo json_encode(['success' => false, 'message' => 'Selling price cannot be negative.']); $db->close(); exit; }
+        if ($cost < 0) { echo json_encode(['success' => false, 'message' => 'Unit cost cannot be negative.']); $db->close(); exit; }
+        if ($qty < 0) $qty = 0;
+        if ($threshold < 0) $threshold = 0;
         if ($type === 'manual') $qty = 999;
 
         // Handle image upload

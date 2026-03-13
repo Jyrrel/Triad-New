@@ -6,12 +6,30 @@
  */
 require_once 'config.php';
 
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 $body   = json_decode(file_get_contents('php://input'), true) ?? [];
 if (!$action) $action = $body['action'] ?? '';
 
 $db = getDB();
+
+
+function mobile_routes() {
+    return [
+        'POST?action=login' => 'Owner/staff login',
+        'GET?action=menu' => 'List available menu for Flutter',
+        'POST?action=place_order' => 'Create completed sale from Flutter app',
+        'GET?action=orders' => 'Recent orders',
+        'GET?action=health' => 'API health check',
+        'GET?action=routes' => 'Discover available mobile endpoints'
+    ];
+}
 
 if ($method === 'POST') {
 
@@ -66,6 +84,16 @@ if ($method === 'POST') {
             exit;
         }
 
+        foreach ($items as $item) {
+            $itemId = intval($item['id'] ?? 0);
+            $itemQty = intval($item['qty'] ?? 0);
+            $itemPrice = floatval($item['price'] ?? -1);
+            if ($itemId <= 0 || $itemQty <= 0 || $itemPrice < 0) {
+                echo json_encode(['success' => false, 'message' => 'Invalid item payload']);
+                exit;
+            }
+        }
+
         $db->begin_transaction();
         try {
             // Insert sale
@@ -84,7 +112,7 @@ if ($method === 'POST') {
 
                 // Deduct stock if applicable
                 if ($item['type'] === 'stock') {
-                    $db->query("UPDATE menu SET qty = qty - {$item['qty']} WHERE id = {$item['id']}");
+                    $db->query("UPDATE menu SET qty = GREATEST(0, qty - {$item['qty']}) WHERE id = {$item['id']}");
                 }
             }
 
@@ -102,11 +130,24 @@ if ($method === 'POST') {
 
 } elseif ($method === 'GET') {
 
+    if ($action === 'health') {
+        echo json_encode(['success' => true, 'service' => 'triad-mobile-api', 'status' => 'ok', 'time' => date(DATE_ATOM)]);
+    }
+
+    elseif ($action === 'routes') {
+        echo json_encode(['success' => true, 'data' => mobile_routes()]);
+    }
+
     // Get menu
-    if ($action === 'menu') {
+    elseif ($action === 'menu') {
         $result = $db->query("SELECT * FROM menu WHERE available=1 ORDER BY category, name");
         $rows = [];
         while ($row = $result->fetch_assoc()) {
+            $row['qty'] = intval($row['qty']);
+            $row['threshold'] = intval($row['threshold']);
+            $row['price'] = floatval($row['price']);
+            $row['cost'] = floatval($row['cost']);
+            $row['available'] = intval($row['available']) === 1;
             $rows[] = $row;
         }
         echo json_encode(['success' => true, 'data' => $rows]);
@@ -118,6 +159,10 @@ if ($method === 'POST') {
         $result = $db->query("SELECT * FROM sales ORDER BY created_at DESC LIMIT 50");
         $rows = [];
         while ($row = $result->fetch_assoc()) {
+            $row['subtotal'] = floatval($row['subtotal']);
+            $row['tax'] = floatval($row['tax']);
+            $row['total'] = floatval($row['total']);
+            $row['persons'] = intval($row['persons']);
             $rows[] = $row;
         }
         echo json_encode(['success' => true, 'data' => $rows]);
