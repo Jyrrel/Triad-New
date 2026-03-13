@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Triad Coffee Roasters — POS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="staff.css"/>
+</head>
+<body data-theme="dark">
+
+<!-- Hidden print frame -->
+<div id="printFrame"></div>
+
+<div class="app" id="appLayout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- ── Header ── -->
+    <div class="sb-head">
+      <button class="sb-hamburger" id="sidebarToggle" title="Toggle sidebar  Alt+H">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="sb-title">Triad Coffee</span>
+    </div>
+
+    <!-- ── Nav ── -->
+    <div class="sb-body">
+      <div class="sb-group-label">Navigate</div>
+
+      <button class="sb-row is-active" data-nav="pos">
+        <span class="sb-row-icon">🖥️</span>
+        <span class="sb-row-text">POS Terminal</span>
+      </button>
+
+      <button class="sb-row" data-nav="orders">
+        <span class="sb-row-icon">🧾</span>
+        <span class="sb-row-text">Orders</span>
+      </button>
+
+      <button class="sb-row" data-nav="dashboard">
+        <span class="sb-row-icon">📊</span>
+        <span class="sb-row-text">Dashboard</span>
+      </button>
+
+      <button class="sb-row" data-nav="archive">
+        <span class="sb-row-icon">📦</span>
+        <span class="sb-row-text">Archive</span>
+      </button>
+    </div>
+
+    <!-- ── Footer / profile ── -->
+    <div class="sb-foot">
+      <button class="sb-profile" id="staffChip">
+        <span class="sb-profile-icon">
+          <span class="sb-avatar-circle" id="sidebarAvatarCircle">TC</span>
+        </span>
+        <span class="sb-profile-info">
+          <span class="sb-profile-name">Triad Staff</span>
+          <span class="sb-profile-role">Cashier · Active</span>
+        </span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ═══ MAIN WRAPPER ═══ -->
+  <div class="main-wrapper" id="mainWrapper">
+  <!-- ═══ MAIN ═══ -->
+  <main class="main" id="mainArea">
+    <header class="topbar">
+      <h1 class="page-title" id="pageTitle">POS Terminal</h1>
+      <div class="topbar-right">
+        <div class="notif-wrap" id="notifWrap">
+          <button class="icon-btn" id="notifBtn" title="Notifications (Alt+N)">
+            🔔
+            <span class="notif-badge" id="notifBadge"></span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-head">
+              <span class="notif-title">Notifications</span>
+            </div>
+            <div class="notif-list-wrap" id="notifList">
+              <div class="notif-empty">No notifications</div>
+            </div>
+            <div class="notif-footer">
+              <button class="notif-view-all-btn" id="notifSeeAllBtn" title="View all stock status">View All Notifications</button>
+            </div>
+          </div>
+        </div>
+        <button class="icon-btn" id="appearanceBtn" title="Appearance (Alt+A)">🎨</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ═══ POS TERMINAL PAGE ═══ -->
+      <div data-page="pos" class="active">
+<div class="pos-landing">
+          <div class="pos-landing-badge">🟢 Terminal Ready</div>
+          <div class="pos-landing-icon">🖥️</div>
+          <h2>Ready to Take Orders?</h2>
+          <p>Launch the full POS terminal to start accepting orders, process payments with cash, e-wallet or card, apply discounts, and manage your queue — all in one place.</p>
+          <a href="POS.html" class="pos-proceed-btn">
+            Proceed to POS <span class="btn-arrow">→</span>
+          </a>
+          <div class="pos-features">
+            <div class="pos-feature-chip"><span>☕</span> Full Menu Ordering</div>
+            <div class="pos-feature-chip"><span>💵</span> Cash · E-Wallet · Card</div>
+            <div class="pos-feature-chip"><span>🏷</span> Discount Management</div>
+            <div class="pos-feature-chip"><span>⌨️</span> Keyboard Shortcuts</div>
+          </div>
+        </div>
+      </div><!-- /pos -->
+
+      <div data-page="orders">
+        <div class="orders-toolbar">
+          <div style="font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase;">Orders</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;color:var(--muted);font-weight:600;">Date:</span>
+              <input type="date" id="orderDateFilter" class="select-input" style="cursor:pointer;" />
+              <button id="clearOrderDateBtn" class="action-btn" title="Clear date filter" style="padding:6px 10px;font-size:11px;">✕</button>
+            </div>
+            <select id="orderFilter" class="select-input">
+              <option value="all">All Types</option>
+              <option value="dine-in">Dine In</option>
+              <option value="takeout">Takeout</option>
+            </select>
+            <select id="orderCatFilter" class="select-input">
+              <option value="all">All Categories</option>
+              <option value="hot-coffee">☕ Hot Coffee</option>
+              <option value="iced-coffee">🧊 Iced Coffee</option>
+              <option value="espresso">⚡ Espresso</option>
+              <option value="frappe">🥤 Frappe</option>
+              <option value="tea">🍵 Tea</option>
+              <option value="pastries">🥐 Pastries</option>
+              <option value="beans">🫘 Beans</option>
+            </select>
+            <button id="clearOrdersBtn" class="action-btn">Archive All</button>
+          </div>
+        </div>
+        <div id="ordersListEl">
+          <div class="placeholder-page" style="margin-top:0;"><div style="font-size:36px;margin-bottom:10px;">🧾</div><h3>No orders yet</h3><p>Completed orders will appear here.</p></div>
+        </div>
+      </div>
+
+      <!-- ═══ DASHBOARD PAGE ═══ -->
+      <div data-page="dashboard">
+        <div class="kpi-row">
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(200,80,26,.15);color:var(--primary);">💰</div><div><div class="kpi-label">Today's Revenue</div><div class="kpi-value" id="kpiRevenue">₱0.00</div><div class="kpi-sub" id="kpiRevSub">0 orders</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,158,92,.15);color:var(--green);">🧾</div><div><div class="kpi-label">Orders Today</div><div class="kpi-value" id="kpiOrders">0</div><div class="kpi-sub" id="kpiOrdersSub">Avg ₱0.00 / order</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(59,130,246,.15);color:#3b82f6;">👥</div><div><div class="kpi-label">Customers Served</div><div class="kpi-value" id="kpiCustomers">0</div><div class="kpi-sub" id="kpiCustomersSub">0 dine-in · 0 takeout</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(200,80,26,.12);color:var(--primary);">☕</div><div><div class="kpi-label">Items Sold</div><div class="kpi-value" id="kpiItems">0</div><div class="kpi-sub" id="kpiItemsSub">Top: —</div></div></div>
+        </div>
+        <div class="dash-row">
+          <div class="dash-card" style="flex:0 0 220px;">
+            <div class="dash-card-head"><div class="dash-card-title">Payment Mix</div></div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:6px;">
+              <div class="pay-mix-item"><div class="pay-mix-label"><span>💵</span> Cash</div><div class="pay-mix-bar-wrap"><div class="pay-mix-bar" id="pmCash" style="width:0%"></div></div><div class="pay-mix-pct" id="pmCashPct">0%</div></div>
+              <div class="pay-mix-item"><div class="pay-mix-label"><span>📱</span> E-Wallet</div><div class="pay-mix-bar-wrap"><div class="pay-mix-bar" id="pmEwallet" style="width:0%;background:#3b82f6"></div></div><div class="pay-mix-pct" id="pmEwalletPct">0%</div></div>
+            </div>
+            <div style="margin-top:20px;"><div class="dash-card-title" style="margin-bottom:8px;">Order Type</div><div style="display:flex;gap:8px;"><div class="otype-chip" style="background:rgba(200,80,26,.12);color:var(--primary);"><span id="otDineCount">0</span><small>Dine In</small></div><div class="otype-chip" style="background:rgba(59,130,246,.1);color:#3b82f6;"><span id="otTakeCount">0</span><small>Takeout</small></div></div></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-head"><div class="dash-card-title">Recent Orders</div><button class="link-btn" onclick="document.querySelector('[data-nav=orders]').click()">View All →</button></div>
+            <div id="recentOrdersEl"><div style="text-align:center;padding:24px 0;color:var(--muted);font-size:13px;">No orders yet.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ ARCHIVE PAGE ═══ -->
+      <div data-page="archive">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--text);">Archived Orders</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">Categorized by product type</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;color:var(--muted);font-weight:600;">Date:</span>
+              <input type="date" id="archiveDateFilter" class="select-input" style="cursor:pointer;" />
+              <button id="clearArchiveDateBtn" class="action-btn" title="Clear date filter" style="padding:6px 10px;font-size:11px;">✕</button>
+            </div>
+            <select id="archiveCatFilter" class="select-input">
+              <option value="all">All Categories</option>
+              <option value="hot-coffee">☕ Hot Coffee</option>
+              <option value="iced-coffee">🧊 Iced Coffee</option>
+              <option value="espresso">⚡ Espresso</option>
+              <option value="frappe">🥤 Frappe</option>
+              <option value="tea">🍵 Tea</option>
+              <option value="pastries">🥐 Pastries</option>
+              <option value="beans">🫘 Beans</option>
+            </select>
+            <button id="clearArchiveBtn" class="action-btn" style="color:var(--green);border-color:var(--green);">↩ Restore All</button>
+          </div>
+        </div>
+        <div id="archiveListEl"><div class="placeholder-page"><div style="font-size:36px;margin-bottom:10px;">📦</div><h3>No archived orders</h3><p>Cleared orders will appear here.</p></div></div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <aside class="right">
+    <div class="panel-head"><h2>Current Order</h2></div>
+    <div class="customer-section">
+      <div><div class="field-label">Customer Name</div><input class="input" type="text" id="custName" placeholder="e.g. Judith Rodriguez"/></div>
+      <div class="row">
+        <div style="flex:1;"><div class="field-label">Persons</div><input class="input" type="number" id="tableText" min="1" max="99" value="1" style="text-align:center;font-weight:700;font-size:15px;"/></div>
+        <div class="qty" style="padding-bottom:1px;"><button class="qty-btn" id="decPerson">−</button><button class="qty-btn" id="incPerson">+</button></div>
+      </div>
+      <div><div class="field-label">Order Type</div><div class="order-type"><button class="type-btn active" data-type="dine-in">🍽️ Dine In</button><button class="type-btn" data-type="takeout">🥡 Takeout</button></div></div>
+    </div>
+    <div class="cart-section" id="cartEl">
+      <div class="cart-empty"><div class="cart-empty-icon">🛒</div><div>Cart is empty</div><div style="margin-top:4px;font-size:11px;color:var(--muted)">Tap items to add them</div></div>
+    </div>
+    <div class="totals-section">
+      <div class="totals">
+        <div class="line total"><span>Total</span><strong id="totalEl">₱0.00</strong></div>
+        <div class="line" style="font-size:10px;margin-top:-4px;"><span style="color:var(--muted);">incl. VAT 12% (<span id="taxEl">₱0.00</span>)</span><span id="subtotalEl" style="display:none"></span></div>
+      </div>
+      <div class="pay-label">Payment Method</div>
+      <div class="pay">
+        <button class="pay-btn active" data-payment="cash"><span class="pay-icon">💵</span>Cash</button>
+        <button class="pay-btn" data-payment="ewallet"><span class="pay-icon">📱</span>E-Wallet</button>
+      </div>
+      <button class="btn btn-primary" id="continueBtn" disabled>Continue to Payment</button>
+    </div>
+  </aside>
+  </div><!-- /main-wrapper -->
+</div><!-- /app -->
+
+<!-- ═══ CUSTOM CONFIRM MODAL ═══ -->
+<div class="confirm-modal-overlay" id="customConfirmModal">
+  <div class="confirm-modal">
+    <div class="confirm-modal-icon-wrap">
+      <div class="confirm-modal-icon archive-icon" id="confirmModalIcon">📦</div>
+      <div class="confirm-modal-title" id="confirmModalTitle">Archive All Orders?</div>
+      <div class="confirm-modal-desc" id="confirmModalDesc">This will move all current orders to the Archive. You can restore them anytime.</div>
+    </div>
+    <div class="confirm-modal-details" id="confirmModalDetails"></div>
+    <div class="confirm-modal-actions">
+      <button class="confirm-cancel-btn" id="confirmCancelBtn">Cancel</button>
+      <button class="confirm-ok-btn archive" id="confirmOkBtn">📦 Archive All</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ STOCK STATUS PANEL ═══ -->
+<div class="modal-overlay" id="stockStatusModal">
+  <div class="modal" style="width:min(600px,95vw);">
+    <div class="modal-head">
+      <h3>📦 Product Stock Status</h3>
+      <button class="modal-close" onclick="document.getElementById('stockStatusModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="stockStatusBody" style="gap:0;overflow-y:auto;max-height:62vh;padding:16px 20px 8px;flex-direction:column;">
+      <!-- rendered by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-confirm" style="flex:1;background:var(--primary);" onclick="document.getElementById('stockStatusModal').classList.remove('open')">✓ Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAYMENT MODAL ═══ -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="payModalTitle">Confirm Payment</h3><button class="modal-close" id="closeModal">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter">
+      <button class="btn-outline" id="cancelPayBtn">Cancel</button>
+      <button class="btn-confirm" id="confirmPayBtn">✓ Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROFILE MODAL ═══ -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal" style="padding-bottom:0;display:flex;flex-direction:column;max-height:92vh;overflow:hidden;">
+    <div id="profileModalContent" style="display:flex;flex-direction:column;flex:1;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ APPEARANCE MODAL ═══ -->
+<div class="modal-overlay" id="appearanceModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Appearance</h3><button class="modal-close" onclick="revertAppearance()" title="Cancel changes">✕</button></div>
+    <div class="modal-body">
+      <div class="app-section">
+        <div class="app-section-title">Theme</div>
+        <div class="theme-grid">
+          <div class="theme-swatch" data-theme="dark" onclick="applyTheme('dark',this)" title="Dark">
+            <div class="swatch-preview" style="background:linear-gradient(135deg,#111210,#1c1916)"></div>
+            <div class="swatch-label">Dark</div>
+          </div>
+          <div class="theme-swatch" data-theme="default" onclick="applyTheme('default',this)" title="Classic">
+            <div class="swatch-preview" style="background:linear-gradient(135deg,#f4f2ee,#fff)"></div>
+            <div class="swatch-label">Classic</div>
+          </div>
+          <div class="theme-swatch" data-theme="espresso" onclick="applyTheme('espresso',this)" title="Espresso">
+            <div class="swatch-preview" style="background:linear-gradient(135deg,#1a1410,#221e19)"></div>
+            <div class="swatch-label" style="background:#221e19;color:#f0ebe4;">Espresso</div>
+          </div>
+          <div class="theme-swatch" data-theme="latte" onclick="applyTheme('latte',this)" title="Latte">
+            <div class="swatch-preview" style="background:linear-gradient(135deg,#faf5ec,#fff9f2)"></div>
+            <div class="swatch-label">Latte</div>
+          </div>
+          <div class="theme-swatch" data-theme="matcha" onclick="applyTheme('matcha',this)" title="Matcha">
+            <div class="swatch-preview" style="background:linear-gradient(135deg,#eef3e8,#f5faf1)"></div>
+            <div class="swatch-label" style="color:#2e4020;">Matcha</div>
+          </div>
+        </div>
+      </div>
+      <div class="app-section">
+        <div class="app-section-title">Brightness & Contrast</div>
+        <div class="contrast-row">
+          <div class="contrast-label">Brightness</div>
+          <input type="range" class="contrast-slider" id="brightnessSlider" min="60" max="140" value="100" oninput="applyFilters()">
+          <div class="contrast-val" id="brightnessVal">100%</div>
+        </div>
+        <div class="contrast-row">
+          <div class="contrast-label">Contrast</div>
+          <input type="range" class="contrast-slider" id="contrastSlider" min="70" max="150" value="100" oninput="applyFilters()">
+          <div class="contrast-val" id="contrastVal">100%</div>
+        </div>
+      </div>
+      <div class="app-section">
+        <div class="app-section-title">Accent Color</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <input type="color" id="accentColorPicker" value="#c8501a" style="width:44px;height:34px;border:none;border-radius:8px;cursor:pointer;background:none;" oninput="applyAccent(this.value)">
+          <span style="font-size:12px;color:var(--muted);">Coffee-inspired palettes</span>
+        </div>
+        <div class="accent-swatches" id="accentSwatches">
+          <div class="accent-dot active" style="background:#c8501a;" onclick="applyAccent('#c8501a',this)" title="Espresso"></div>
+          <div class="accent-dot" style="background:#8B4513;" onclick="applyAccent('#8B4513',this)" title="Dark Roast"></div>
+          <div class="accent-dot" style="background:#D2691E;" onclick="applyAccent('#D2691E',this)" title="Mocha"></div>
+          <div class="accent-dot" style="background:#a0522d;" onclick="applyAccent('#a0522d',this)" title="Sienna"></div>
+          <div class="accent-dot" style="background:#4a7c3f;" onclick="applyAccent('#4a7c3f',this)" title="Matcha"></div>
+          <div class="accent-dot" style="background:#2c7da0;" onclick="applyAccent('#2c7da0',this)" title="Cold Brew"></div>
+          <div class="accent-dot" style="background:#7b5ea7;" onclick="applyAccent('#7b5ea7',this)" title="Lavender"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-confirm" style="flex:1;background:var(--primary);" onclick="saveAppearance()">✓ Save & Close</button></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="../triad-db.js"></script>
+<script src="staff.js"></script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Triad Coffee Roasters</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: url("../images/triad.png") center / cover no-repeat;
+    color: #fff;
+}
+
+/* NAVBAR */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 10;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+}
+
+.logo img {
+    height: 38px;
+}
+
+.nav-links a,
+.login-btn {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 25px;
+    font-size: 14px;
+}
+
+.login-btn {
+    background: #fff;
+    color: #000;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* OVERLAY */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+/* ROLE BOX */
+.role-box{
+    width: 380px;
+    background: rgba(0,0,0,0.8);
+    border-radius: 10px;
+    padding: 35px;
+    text-align: center;
+}
+
+.role-box h2 {
+    margin-bottom: 20px;
+}
+
+.role-box button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 4px;
+    background: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ===== NEW LOGIN STYLE ===== */
+.auth-shell{
+    width: min(1100px, 95vw);
+    height: min(560px, 92vh);
+    display: none;
+    grid-template-columns: 1.2fr 0.8fr;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* LEFT */
+.auth-left{
+    background: rgba(255,255,255,0.08);
+}
+.auth-left-inner{
+    height:100%;
+    padding:30px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.auth-left-logo{
+    width:130px;
+    height:auto;
+    object-fit:contain;
+    background:#fff;
+    padding:12px;
+    border-radius:8px;
+}
+
+.auth-left-name{
+    /* NOTE: You need to have "Cooper Black" font installed on your system or import it for this to work. */
+    font-family: "Cooper Black", serif;
+    font-size:36px;
+    font-weight:900;
+    letter-spacing:2px;
+    margin-top:20px;
+    line-height: 1.1;
+}
+.left-branding{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+}
+.auth-left-sub{
+    font-family: 'Allura', cursive;
+    font-size: 32px;
+    margin-top:8px;
+    opacity:0.9;
+}
+.auth-left-big{
+    margin-top: 60px;
+}
+
+.auth-left-big h1{
+    font-size: 44px;
+    letter-spacing: 2px;
+}
+
+.auth-left-big p{
+    margin-top: 6px;
+    opacity: 0.85;
+}
+
+/* RIGHT */
+.auth-right{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+}
+
+.auth-card{
+    width: min(380px, 95%);
+    background: rgba(255,255,255,0.92);
+    color: #111;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 14px 35px rgba(0,0,0,0.25);
+}
+
+.auth-title{
+    margin: 0;
+    font-size: 22px;
+}
+
+.auth-sub{
+    margin: 6px 0 18px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.auth-label{
+    font-size: 13px;
+    color: #374151;
+    display:block;
+    margin-bottom: 6px;
+}
+
+.auth-input{
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    outline: none;
+    font-size: 14px;
+}
+
+.auth-input:focus{
+    border-color: #3b82f6;
+}
+
+.auth-pass-wrap{
+    position: relative;
+}
+
+.auth-eye{
+    position:absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.7;
+}
+
+.auth-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    margin: 14px 0 18px;
+}
+
+.auth-check{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 13px;
+    color:#111;
+}
+
+.auth-back{
+    border:none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.auth-btn{
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #1d4ed8;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.auth-btn:hover{
+    filter: brightness(1.05);
+}
+
+@media(max-width: 900px){
+    .auth-shell{
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .auth-left{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">
+        <img src="../images/logo.jpg" alt="Triad Logo">
+        <span>Triad Coffee Roasters</span>
+    </div>
+    <div class="nav-links">
+        <span class="login-btn" id="loginBtn">Login</span>
+    </div>
+</div>
+
+<div class="overlay" id="overlay">
+
+    <div class="role-box" id="roleBox">
+        <h2>Login As</h2>
+        <button data-role="Staff">Staff</button>
+        <button data-role="Owner">Owner</button>
+    </div>
+
+    <div class="auth-shell" id="loginBox">
+        
+        <div class="auth-left">
+           <div class="auth-left-inner">
+
+                <div class="left-branding">
+                    <img src="../images/logo.jpg" class="auth-left-logo" alt="Triad Logo" />
+                    <div class="auth-left-name">Triad Coffee<br />Roasters</div>
+                    <div class="auth-left-sub">8th 2nd St. Nazareth, Cagayan De Oro City</div>
+                </div>
+
+                <div class="auth-left-big">
+                    <h1>WELCOME</h1>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="auth-right">
+            <div class="auth-card">
+                <h2 class="auth-title">Sign In</h2>
+                <p class="auth-sub" id="roleTitle"></p>
+
+                <label class="auth-label">Email</label>
+                <input type="email" class="auth-input" id="emailInput" placeholder="Enter Email">
+
+                <label class="auth-label" style="margin-top:12px;">Staff PIN</label>
+<div class="auth-pass-wrap">
+    <input
+        type="password"
+        class="auth-input"
+        id="password"
+        placeholder="Enter 4-digit PIN"
+        maxlength="4"
+        inputmode="numeric"
+        pattern="[0-9]{4}"
+    >
+    <button class="auth-eye" type="button" id="eyeBtn">👁</button>
+</div>
+
+                <div class="auth-row">
+                    <label class="auth-check">
+                        <input type="checkbox" id="togglePassword">
+                        <span>Show password</span>
+                    </label>
+
+                    <button class="auth-back" type="button" id="backBtn">Back</button>
+                </div>
+
+                <button class="auth-btn" id="signInBtn">Sign In</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>

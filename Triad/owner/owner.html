@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Triad Coffee Roaster — Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="owner.css"/>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="brand"><h1>Triad Coffee<br>Roaster</h1><p>Manager Portal</p></div>
+  <div class="owner-badge" onclick="openProfileModal()" style="cursor:pointer;" title="Edit profile">
+    <div class="ava" id="ownerAva" style="font-size:18px;">🧑‍💼</div>
+    <div><div class="oname" id="ownerNameDisplay">Josh Estrada</div><div class="orole">👑 Owner</div></div>
+    <span style="margin-left:auto;font-size:11px;color:var(--muted)">✎</span>
+  </div>
+  <div class="nav-sec">
+    <div class="nav-lbl">Overview</div>
+    <div class="nav-item active" data-page="dashboard"><span class="ic">📊</span><span>Dashboard</span></div>
+    <div class="nav-item" data-page="orders"><span class="ic">🧾</span><span>Orders</span></div>
+    <div class="nav-item" data-page="stock"><span class="ic">📦</span><span>Stock Manager</span></div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-sec">
+    <div class="nav-lbl">More</div>
+    <div class="nav-item" data-page="staff"><span class="ic">👥</span><span>Staff Accounts</span></div>
+    <div class="nav-item" data-page="menu"><span class="ic">🍵</span><span>Menu & Pricing</span></div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-sec">
+    <div class="nav-lbl">Archive</div>
+    <div class="nav-item" data-page="archive-menu"><span class="ic">📦</span><span>Menu Archive</span></div>
+    <div class="nav-item" data-page="archive-staff"><span class="ic">👤</span><span>Staff Archive</span></div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-sec" style="margin-top:auto;">
+    <div class="nav-item" id="exportNavBtn" onclick="exportReport()"><span class="ic">📄</span><span>Export Report</span></div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-right">
+      <div class="period-tabs" id="periodTabs">
+        <button class="period-tab active" onclick="setPeriod('today')">Today</button>
+        <button class="period-tab" onclick="setPeriod('week')">This Week</button>
+        <button class="period-tab" onclick="setPeriod('month')">This Month</button>
+      </div>
+      <!-- Notification bell -->
+      <div class="notif-wrap" id="notifWrap">
+        <button class="tbtn icon-btn" id="bellBtn" onclick="toggleNotif()" title="Notifications">🔔</button>
+        <div class="notif-badge" id="bellBadge">0</div>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-dd-head">
+            <div class="notif-dd-title">Notifications</div>
+          </div>
+          <div class="notif-list" id="notifList"><div class="notif-empty">All caught up! ✅</div></div>
+          <button class="notif-view-all-btn" onclick="openNotifAll();document.getElementById('notifDropdown').classList.remove('open')">View All Notifications →</button>
+        </div>
+      </div>
+      <!-- Appearance icon button -->
+      <button class="tbtn icon-btn" onclick="openAppear()" title="Appearance">🎨</button>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD PAGE ══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--pl)">💰</div><div><div class="kpi-val" id="kRevenue">₱0.00</div><div class="kpi-lbl">Revenue</div><div class="kpi-sub" id="kRevSub">0 orders</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--gl)">🧾</div><div><div class="kpi-val" id="kOrders">0</div><div class="kpi-lbl">Orders</div><div class="kpi-sub" id="kOrdersSub">Avg ₱0.00</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--bl)">👥</div><div><div class="kpi-val" id="kCustomers">0</div><div class="kpi-lbl">Customers</div><div class="kpi-sub" id="kCustSub">0 dine · 0 take</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--al)">☕</div><div><div class="kpi-val" id="kItems">0</div><div class="kpi-lbl">Items Sold</div><div class="kpi-sub" id="kItemsSub">Top: —</div></div></div>
+    </div>
+
+    <div class="dash-grid-wide">
+      <div class="panel">
+        <div class="ph"><div class="ptt">Revenue Overview</div><span id="chartSubtitle" style="font-size:10.5px;color:var(--muted)">Today by hour</span></div>
+        <div class="linechart-wrap">
+          <canvas class="linechart-canvas" id="revenueCanvas"></canvas>
+          <div class="chart-tooltip" id="revenueTooltip"></div>
+          <div id="chartLabels" style="display:flex;justify-content:space-between;margin-top:4px"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ptt">Order Types</div></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="35" fill="none" stroke="var(--line)" stroke-width="12"/>
+              <circle cx="45" cy="45" r="35" fill="none" stroke="var(--blue)" stroke-width="12" stroke-dasharray="220" stroke-dashoffset="0" id="donutDine" style="transition:.4s"/>
+              <circle cx="45" cy="45" r="35" fill="none" stroke="var(--green)" stroke-width="12" stroke-dasharray="220" stroke-dashoffset="0" id="donutTake" style="transition:.4s"/>
+            </svg>
+            <div class="donut-center"><div class="donut-pct" id="donutPct">0</div><div class="donut-sub">orders</div></div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Dine-In<span class="legend-val" id="legDine">0</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Takeout<span class="legend-val" id="legTake">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="ph"><div class="ptt">🏆 Top Sellers</div><span style="font-size:10.5px;color:var(--muted)" id="topSellerPeriod">Today</span></div>
+        <div class="seller-list" id="topSellersList"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No sales yet.</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ptt">💳 Payments</div></div>
+        <div id="payBreakdown"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No data.</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ptt">⏱ Busiest Hours</div><span style="font-size:10.5px;color:var(--muted)">Orders/hr</span></div>
+        <div class="linechart-wrap" style="padding:12px 14px 8px">
+          <canvas class="linechart-canvas" id="hourlyCanvas" style="height:90px"></canvas>
+          <div class="chart-tooltip" id="hourlyTooltip"></div>
+          <div id="hourlyLabels" style="display:flex;justify-content:space-between;margin-top:3px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid-wide">
+      <div class="panel">
+        <div class="ph">
+          <div class="ptt">Recent Orders</div>
+          <button class="link-btn" onclick="openAllOrders()">View All Orders →</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="order-table">
+            <thead><tr><th>#</th><th>Customer</th><th>Items</th><th>Type</th><th>Payment</th><th>Total</th><th>Time</th></tr></thead>
+            <tbody id="recentOrdersBody"><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">No orders yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="summary-card">
+          <div class="summary-title">Sales by Category</div>
+          <div id="catBreakdown"><div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">No data.</div></div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-title">Financial Summary</div>
+          <div class="summary-item"><span>Gross Revenue</span><span id="fGross" style="font-weight:700">₱0.00</span></div>
+          <div class="summary-item"><span>VAT (12%)</span><span id="fTax" style="font-weight:700">₱0.00</span></div>
+          <div class="summary-item"><span>Net Revenue</span><span id="fNet" style="font-weight:700;color:var(--green)">₱0.00</span></div>
+          <div class="summary-total"><span>Total Orders</span><span id="fOrders">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Calendar & Activities ── -->
+    <div class="panel" style="padding:0;overflow:hidden;">
+      <div class="ph" style="padding:12px 14px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;">
+        <div class="ptt">📅 Calendar & Activities</div>
+        <button onclick="openDoneHistory()"
+          style="height:28px;padding:0 12px;border-radius:7px;border:1.5px solid var(--line);
+          background:var(--bg);color:var(--text2);font-size:11.5px;font-weight:700;
+          cursor:pointer;display:flex;align-items:center;gap:5px;transition:.12s;"
+          onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+          onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text2)'">
+          ✅ History
+        </button>
+      </div>
+      <div class="cal-widget">
+        <!-- Left: mini calendar -->
+        <div class="cal-widget-left">
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+            <span class="cal-month-lbl" id="calMonthLbl"></span>
+            <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <!-- Right: activities for selected day -->
+        <div class="cal-widget-right">
+          <div class="cal-act-header">
+            <span class="cal-act-date-lbl" id="calActDateLbl">Today</span>
+            <button class="cal-add-btn" onclick="openActModal()">＋ Add Activity</button>
+          </div>
+          <div class="cal-act-list" id="calActList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dashboard -->
+
+<!-- ══ ADD ACTIVITY MODAL ══ -->
+<div class="act-modal-overlay" id="actModalOverlay">
+  <div class="act-modal">
+    <div class="act-modal-head">
+      <h3 id="actModalTitle">Add Activity</h3>
+      <button class="appear-modal-close" onclick="closeActModal()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="act-modal-body">
+      <div><label class="form-label">Title</label>
+        <input class="form-input" id="actTitle" placeholder="e.g. Staff meeting, Supplier delivery…"/>
+      </div>
+      <div class="staff-modal-row2">
+        <div><label class="form-label">Time</label>
+          <input class="form-input" id="actTime" type="time" value="09:00"/>
+        </div>
+        <div><label class="form-label">End Time <span style="color:var(--muted);font-weight:400">(opt.)</span></label>
+          <input class="form-input" id="actEndTime" type="time"/>
+        </div>
+      </div>
+      <div><label class="form-label">Note <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <input class="form-input" id="actNote" placeholder="Any extra details…"/>
+      </div>
+      <div>
+        <label class="form-label">Color</label>
+        <div class="act-color-row" id="actColorRow"></div>
+      </div>
+    </div>
+    <div class="staff-modal-footer">
+      <button class="modal-cancel" onclick="closeActModal()">Cancel</button>
+      <button class="modal-save" onclick="saveActivity()">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONE HISTORY MODAL ══ -->
+<div class="act-modal-overlay" id="doneHistoryOverlay" style="z-index:930;">
+  <div class="act-modal" style="width:min(520px,94vw);max-height:80vh;display:flex;flex-direction:column;">
+    <div class="act-modal-head" style="flex-shrink:0;">
+      <h3>✅ Done Activity History</h3>
+      <button class="appear-modal-close" onclick="closeDoneHistory()" style="color:var(--text)">✕</button>
+    </div>
+    <!-- Date filter row -->
+    <div style="padding:10px 18px 8px;border-bottom:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <label style="font-size:11.5px;font-weight:700;color:var(--muted);">Filter by date:</label>
+      <input type="date" id="doneHistFrom"
+        style="height:28px;padding:0 8px;border-radius:7px;border:1.5px solid var(--line);
+        background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;outline:none;cursor:pointer;"
+        onchange="clampDateToToday(this);renderDoneHistory()"/>
+      <span style="font-size:12px;color:var(--muted);">to</span>
+      <input type="date" id="doneHistTo"
+        style="height:28px;padding:0 8px;border-radius:7px;border:1.5px solid var(--line);
+        background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;outline:none;cursor:pointer;"
+        onchange="clampDateToToday(this);renderDoneHistory()"/>
+      <button onclick="document.getElementById('doneHistFrom').value='';document.getElementById('doneHistTo').value='';renderDoneHistory();"
+        style="height:26px;padding:0 10px;border-radius:6px;border:1.5px solid var(--line);
+        background:none;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;">Reset</button>
+    </div>
+    <div id="doneHistoryList" style="overflow-y:auto;flex:1;padding:12px 18px 16px;"></div>
+  </div>
+</div>
+
+<!-- ══ CHANGE PASSWORD MODAL ══ -->
+<div class="act-modal-overlay" id="changePwOverlay" style="z-index:960;">
+  <div class="act-modal" style="width:min(360px,92vw);">
+    <div class="act-modal-head">
+      <h3>🔒 Change Password</h3>
+      <button class="appear-modal-close" onclick="closeChangePassword()">✕</button>
+    </div>
+    <div class="act-modal-body">
+      <!-- Current password -->
+      <div>
+        <label class="form-label">Current Password</label>
+        <div class="cpw-field">
+          <input class="form-input" id="cpwCurrent" type="password" placeholder="Enter current password"/>
+          <button class="cpw-eye" onclick="toggleCpwEye('cpwCurrent',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <!-- Divider -->
+      <div style="height:1px;background:var(--line);margin:2px 0;"></div>
+      <!-- New password -->
+      <div>
+        <label class="form-label">New Password</label>
+        <div class="cpw-field">
+          <input class="form-input" id="cpwNew" type="password" placeholder="At least 8 characters" oninput="evalPwStrength()"/>
+          <button class="cpw-eye" onclick="toggleCpwEye('cpwNew',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
+        <div class="pw-strength-lbl" id="pwStrengthLbl" style="color:var(--muted)"></div>
+      </div>
+      <!-- Confirm password -->
+      <div>
+        <label class="form-label">Confirm New Password</label>
+        <div class="cpw-field">
+          <input class="form-input" id="cpwConfirm" type="password" placeholder="Re-enter new password" oninput="evalPwMatch()"/>
+          <button class="cpw-eye" onclick="toggleCpwEye('cpwConfirm',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pw-strength-lbl" id="pwMatchLbl" style="color:var(--muted)"></div>
+      </div>
+    </div>
+    <div class="staff-modal-footer">
+      <button class="modal-cancel" onclick="closeChangePassword()">Cancel</button>
+      <button class="modal-save" onclick="submitChangePassword()">✓ Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOGOUT CONFIRM MODAL ══ -->
+<div class="act-modal-overlay" id="logoutOverlay" style="z-index:950; display:none;">
+  <div class="act-modal" style="width:min(320px,88vw);overflow:visible;">
+
+    <!-- Icon + title -->
+    <div style="padding:28px 24px 16px;text-align:center;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--rl);
+        display:flex;align-items:center;justify-content:center;
+        font-size:22px;margin:0 auto 14px;">⏻</div>
+
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;
+        color:var(--text);margin-bottom:7px;">Log Out?</div>
+
+      <div style="font-size:13px;color:var(--muted);line-height:1.5;">
+        Are you sure you want to log out of the Manager Portal?
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex;gap:10px;padding:12px 20px 22px;">
+      <button type="button" onclick="closeLogoutModal()"
+        style="flex:1;height:40px;border-radius:10px;border:1.5px solid var(--line);
+        background:var(--bg);color:var(--text);font-size:13px;font-weight:700;
+        cursor:pointer;font-family:inherit;transition:.12s;"
+        onmouseover="this.style.borderColor='var(--primary)'"
+        onmouseout="this.style.borderColor='var(--line)'">
+        Cancel
+      </button>
+
+      <button type="button" onclick="confirmLogOut()"
+        style="flex:1;height:40px;border-radius:10px;border:none;
+        background:var(--red);color:#fff;font-size:13px;font-weight:700;
+        cursor:pointer;font-family:inherit;transition:.12s;"
+        onmouseover="this.style.filter='brightness(1.1)'"
+        onmouseout="this.style.filter=''">
+        ⏻ Log Out
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ QUICK RESTOCK MODAL ══ -->
+<div class="act-modal-overlay" id="quickRestockOverlay" style="z-index:940;">
+  <div class="act-modal" style="width:min(360px,92vw);">
+    <div class="act-modal-head">
+      <h3 id="qrModalTitle">Restock Product</h3>
+      <button class="appear-modal-close" onclick="closeQuickRestock()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="act-modal-body">
+      <div>
+        <label class="form-label">Product</label>
+        <div id="qrProductName" style="font-size:14px;font-weight:700;color:var(--text);padding:7px 10px;
+          background:var(--bg);border:1.5px solid var(--line);border-radius:8px;"></div>
+      </div>
+      <div class="staff-modal-row2">
+        <div>
+          <label class="form-label">Add Quantity</label>
+          <input class="form-input" id="qrQty" type="number" min="1" placeholder="e.g. 10"/>
+        </div>
+        <div>
+          <label class="form-label">Unit Cost <span style="color:var(--muted);font-weight:400">(opt.)</span></label>
+          <input class="form-input" id="qrCost" type="number" min="0" step="0.01" placeholder="0"/>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Note <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <input class="form-input" id="qrNote" placeholder="e.g. Supplier delivery…"/>
+      </div>
+    </div>
+    <div class="staff-modal-footer">
+      <button class="modal-cancel" onclick="closeQuickRestock()">Cancel</button>
+      <button class="modal-save" onclick="submitQuickRestock()">＋ Restock</button>
+    </div>
+  </div>
+</div>
+
+  <!-- ══ STOCK MANAGER PAGE ══ -->
+  <div class="page" id="page-stock">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon" style="background:var(--pl)">📦</div><div><div class="stat-val" id="sTotalSKU">0</div><div class="stat-lbl">Total SKUs</div></div></div>
+      <div class="stat-card clickable" onclick="openRestockModal()" title="Click to restock low items"><div class="stat-icon" style="background:var(--rl)">⚠️</div><div><div class="stat-val" id="sLow" style="color:var(--red)">0</div><div class="stat-lbl">Need Restock ↗</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--gl)">✅</div><div><div class="stat-val" id="sOk" style="color:var(--green)">0</div><div class="stat-lbl">Well Stocked</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--al)">💸</div><div><div class="stat-val" id="sValue">₱0</div><div class="stat-lbl">Stock Value</div></div></div>
+    </div>
+    <div class="layout">
+      <div class="panel">
+        <div class="ph">
+          <div class="ptt">Inventory</div>
+          <div class="pa">
+            <div class="search-wrap"><input class="search-input" id="searchInput" placeholder="Search…" oninput="invPage=0;renderTable()"/></div>
+            <select id="invCatFilter" onchange="invPage=0;renderTable()" style="height:27px;font-size:11px;padding:0 6px;cursor:pointer;border-radius:7px;border:1.5px solid var(--line);background:var(--bg);color:var(--text);outline:none;font-family:inherit;transition:.12s;">
+              <option value="all">All Categories</option>
+              <option value="hot-coffee">☕ Hot Coffee</option>
+              <option value="iced-coffee">🧊 Iced Coffee</option>
+              <option value="espresso">⚡ Espresso</option>
+              <option value="frappe">🥤 Frappe</option>
+              <option value="tea">🍵 Tea</option>
+              <option value="pastries">🥐 Pastries</option>
+              <option value="beans">🫘 Beans</option>
+            </select>
+            <button class="chip active" id="chip-all" onclick="setFilter('all')">All</button>
+            <button class="chip" id="chip-low" onclick="setFilter('low')">⚠ Low</button>
+            <button class="tbtn primary" style="height:28px;font-size:11.5px;padding:0 11px" onclick="openAddModal()">＋ Add Product</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Product</th><th>Type</th><th>Stock</th><th>Qty</th><th>Threshold</th><th>Actions</th></tr></thead>
+          <tbody id="tableBody"></tbody></table>
+        </div>
+        <div class="inv-footer" id="invFooter" style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-top:1px solid var(--line);background:var(--bg);gap:8px;flex-wrap:wrap;">
+          <span id="invPageInfo" style="font-size:11.5px;color:var(--muted);font-weight:600"></span>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="mini-btn" id="invPrev" onclick="invChangePage(-1)">← Prev</button>
+            <span id="invPageNum" style="font-size:11.5px;font-weight:700;color:var(--text);padding:0 4px"></span>
+            <button class="mini-btn" id="invNext" onclick="invChangePage(1)">Next →</button>
+            <button class="link-btn" onclick="openAllProducts()" style="margin-left:6px;font-size:12px">View All Products →</button>
+          </div>
+        </div>
+      </div>
+      <div class="right-stack">
+        <div class="panel">
+          <div class="ph"><div class="ptt">🚨 Alerts</div><div style="display:flex;align-items:center;gap:8px;"><span id="alertCount" style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--rl);color:var(--red)">0</span><button class="link-btn" onclick="openAlertsAll()">View All →</button></div></div>
+          <div id="alertsBody"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ptt">⚡ Quick Restock</div></div>
+          <div class="restock-form">
+            <div>
+              <label class="form-label">Product</label>
+              <input class="form-input" id="rProduct" type="text" placeholder="Type product name…" autocomplete="off" list="rProductList" oninput="syncRProductId()"/>
+              <datalist id="rProductList"></datalist>
+              <input type="hidden" id="rProductId"/>
+            </div>
+            <div class="form-row2">
+              <div><label class="form-label">Qty to Add</label><input class="form-input" id="rQty" type="number" min="1" placeholder="e.g. 10"/></div>
+              <div><label class="form-label">Unit Cost (₱)</label><input class="form-input" id="rCost" type="number" min="0" step="0.01" placeholder="e.g. 270"/></div>
+            </div>
+            <div><label class="form-label">Note</label><textarea class="note-textarea" id="rNote" placeholder="e.g. Delivered by Magnolia, Batch #3 — store in dry storage…"></textarea></div>
+            <button class="restock-btn" onclick="doRestock()">📦 Confirm Restock</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ptt">📋 Audit Log</div><button class="link-btn" onclick="openAuditAll()">View All →</button></div>
+          <div class="audit-list" id="auditList"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /stock -->
+
+  <!-- ══ ORDERS PAGE ══ -->
+  <div class="page" id="page-orders">
+
+    <!-- KPI strip -->
+    <div class="orders-kpi-grid">
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--pl)">🧾</div><div><div class="kpi-val" id="okTotal">0</div><div class="kpi-lbl">Total Orders</div><div class="kpi-sub" id="okPeriod">All time</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--gl)">💰</div><div><div class="kpi-val" id="okRevenue">₱0</div><div class="kpi-lbl">Revenue</div><div class="kpi-sub" id="okAvg">Avg ₱0</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--bl)">🍽</div><div><div class="kpi-val" id="okDine">0</div><div class="kpi-lbl">Dine-In</div><div class="kpi-sub" id="okDinePct">0%</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--al)">🥡</div><div><div class="kpi-val" id="okTake">0</div><div class="kpi-lbl">Takeout</div><div class="kpi-sub" id="okTakePct">0%</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--purpl)">💳</div><div><div class="kpi-val" id="okVat">₱0</div><div class="kpi-lbl">VAT (12%)</div><div class="kpi-sub" id="okNet">Net ₱0</div></div></div>
+    </div>
+
+    <!-- Transaction History panel -->
+    <div class="panel txn-page">
+
+      <!-- Header row: title + search/filters/reset -->
+      <div class="txn-topbar">
+        <div class="txn-title">Transaction History</div>
+        <div class="txn-controls">
+          <div class="txn-search-wrap">
+            <input class="txn-search" id="ordSearch" placeholder="Order # or customer…" oninput="ordPage=0;renderOrdersPage()"/>
+          </div>
+          <select class="txn-select" id="txnPayFilter" onchange="ordPage=0;renderOrdersPage()">
+            <option value="all">All Payments</option>
+            <option value="cash">💵 Cash</option>
+            <option value="gcash">📱 GCash</option>
+            <option value="paymaya">💜 PayMaya</option>
+          </select>
+          <select class="txn-select" id="txnTypeFilter" onchange="ordPage=0;renderOrdersPage()">
+            <option value="all">All Status</option>
+            <option value="dine-in">🍽 Dine-In</option>
+            <option value="takeout">🥡 Takeout</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Date range bar (kept at top as requested) -->
+      <div class="txn-datebar">
+        <span class="txn-datebar-label">Date Range:</span>
+        <input type="date" class="txn-date-input" id="ordFrom"
+          onchange="clampDateToToday(this);ordPage=0;renderOrdersPage()"/>
+        <span class="txn-date-sep">→</span>
+        <input type="date" class="txn-date-input" id="ordTo"
+          onchange="clampDateToToday(this);ordPage=0;renderOrdersPage()"/>
+        <button class="txn-date-all" onclick="clearOrdDates()">All</button>
+        <span id="txnResultCount" style="margin-left:auto;font-size:11px;font-weight:600;color:var(--muted)"></span>
+      </div>
+
+      <!-- Table body -->
+      <div class="txn-body">
+          <table class="txn-table">
+            <colgroup>
+              <col class="col-id"/><col class="col-cust"/><col class="col-cashier"/><col class="col-items"/>
+              <col class="col-pay"/><col class="col-sub"/><col class="col-vat"/>
+              <col class="col-total"/><col class="col-dt"/><col class="col-status"/>
+              <col class="col-actions"/>
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Order #</th><th>Customer</th><th>Cashier</th><th>Items</th>
+                <th>Payment</th><th>Subtotal</th><th>VAT</th><th>Total</th>
+                <th>Date &amp; Time</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersPageBody"></tbody>
+          </table>
+      </div>
+
+      <!-- Orders pagination footer -->
+      <div class="inv-footer" id="ordFooter" style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-top:1px solid var(--line);background:var(--bg);gap:8px;flex-wrap:wrap;">
+        <span id="ordPageInfo" style="font-size:11.5px;color:var(--muted);font-weight:600"></span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="mini-btn" id="ordPrev" onclick="ordChangePage(-1)">← Prev</button>
+          <span id="ordPageNum" style="font-size:11.5px;font-weight:700;color:var(--text);padding:0 4px"></span>
+          <button class="mini-btn" id="ordNext" onclick="ordChangePage(1)">Next →</button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /orders -->
+
+  <!-- ══ STAFF ACCOUNTS PAGE ══ -->
+  <div class="page" id="page-staff">
+
+    <!-- Topbar -->
+    <div class="staff-topbar">
+      <div style="flex:1"></div>
+      <div class="staff-controls">
+        <div class="staff-search-wrap">
+          <input class="staff-search" id="staffSearch" placeholder="Search by name…" oninput="renderStaff()"/>
+        </div>
+        <select class="staff-role-filter" id="staffRoleFilter" onchange="renderStaff()">
+          <option value="all">All Roles</option>
+          <option value="Barista">Barista</option>
+          <option value="Cashier">Cashier</option>
+          <option value="Shift Lead">Shift Lead</option>
+          <option value="Manager">Manager</option>
+        </select>
+        <button class="staff-add-btn" onclick="openStaffModal()">＋ Add Staff</button>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="staff-stats-grid">
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--pl)">👥</div><div><div class="kpi-val" id="sfTotal">0</div><div class="kpi-lbl">Total Staff</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--gl)">✅</div><div><div class="kpi-val" id="sfActive">0</div><div class="kpi-lbl">Active</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--al)">⏸</div><div><div class="kpi-val" id="sfInactive">0</div><div class="kpi-lbl">Inactive</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--bl)">🔑</div><div><div class="kpi-val" id="sfRoles">0</div><div class="kpi-lbl">Roles</div></div></div>
+    </div>
+
+    <!-- Staff table -->
+    <div class="panel">
+      <div class="staff-table-wrap">
+        <table class="staff-table">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Role</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="staffTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /staff -->
+
+  <!-- ══ MENU & PRICING PAGE ══ -->
+  <div class="page" id="page-menu">
+
+    <!-- Topbar -->
+    <div class="menu-topbar">
+      <div style="flex:1"></div>
+      <div class="menu-controls">
+        <div class="menu-search-wrap">
+          <input class="menu-search" id="menuSearch" placeholder="Search items…" oninput="renderMenu()"/>
+        </div>
+        <select class="menu-cat-filter" id="menuCatFilter" onchange="renderMenu()">
+          <option value="all">All Categories</option>
+          <option value="hot-coffee">☕ Hot Coffee</option>
+          <option value="iced-coffee">🧊 Iced Coffee</option>
+          <option value="espresso">⚡ Espresso</option>
+          <option value="frappe">🥤 Frappe</option>
+          <option value="tea">🍵 Tea</option>
+          <option value="pastries">🥐 Pastries</option>
+          <option value="beans">🫘 Beans</option>
+        </select>
+        <select class="menu-avail-filter" id="menuAvailFilter" onchange="renderMenu()">
+          <option value="all">All Items</option>
+          <option value="available">✅ Available</option>
+          <option value="unavailable">Unavailable</option>
+        </select>
+        <button class="menu-add-btn" onclick="openMenuModal()">＋ Add Item</button>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="menu-stats-grid">
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--pl)">🍽</div><div><div class="kpi-val" id="mnTotal">0</div><div class="kpi-lbl">Total Items</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--gl)">✅</div><div><div class="kpi-val" id="mnAvail">0</div><div class="kpi-lbl">Available</div><div class="kpi-sub" id="mnUnavail">0 Unavailable</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--al)">💰</div><div><div class="kpi-val" id="mnAvgPrice">₱0</div><div class="kpi-lbl">Avg Price</div></div></div>
+      <div class="kpi-card"><div class="kpi-ico" style="background:var(--bl)">📂</div><div><div class="kpi-val" id="mnCats">0</div><div class="kpi-lbl">Categories</div></div></div>
+    </div>
+
+    <!-- Menu item cards by category -->
+    <div id="menuBody"></div>
+
+  </div><!-- /menu -->
+
+  <!-- ══ MENU ARCHIVE PAGE ══ -->
+  <div class="page" id="page-archive-menu">
+    <div class="archive-page-header">
+      <div class="archive-controls" style="justify-content:flex-end;width:100%">
+        <span class="archive-count" id="menuArchiveCount">0 items</span>
+        <div class="arc-date-wrap">
+          <input type="text" class="arc-date-txt" id="menuDateTxt" placeholder="DD/MM/YYYY" maxlength="10"
+            oninput="arcDateTyping(this,'menu')" onblur="arcDateBlur(this,'menu')"/>
+          <button class="arc-cal-btn" id="menuCalBtn" onmousedown="arcCalToggle(event,'menu')" tabindex="-1">📅</button>
+          <input type="date" class="arc-hidden-date" id="menuArchiveDate" onchange="arcHiddenChanged('menu')" max=""/>
+        </div>
+        <button class="archive-all-dates active" id="menuArchiveAllBtn" onclick="clearMenuArchiveDate()">All Dates</button>
+        <button class="restore-all-btn" onclick="restoreAllMenuItems()">↩ Restore All</button>
+      </div>
+    </div>
+    <div class="archive-notice">⏳ Items are permanently deleted after <strong>30 days</strong>. Restore anything you want to keep.</div>
+    <div class="archive-table-wrap">
+      <div style="overflow-x:auto">
+        <table class="archive-table">
+          <thead><tr><th>Item Name</th><th>Category</th><th>Price</th><th>Unit</th><th>Expires In</th><th>Archived On</th><th>Action</th></tr></thead>
+          <tbody id="menuArchiveBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /archive-menu -->
+
+  <!-- ══ STAFF ARCHIVE PAGE ══ -->
+  <div class="page" id="page-archive-staff">
+    <div class="archive-page-header">
+      <div class="archive-controls" style="justify-content:flex-end;width:100%">
+        <span class="archive-count" id="staffArchiveCount">0 members</span>
+        <div class="arc-date-wrap">
+          <input type="text" class="arc-date-txt" id="staffDateTxt" placeholder="DD/MM/YYYY" maxlength="10"
+            oninput="arcDateTyping(this,'staff')" onblur="arcDateBlur(this,'staff')"/>
+          <button class="arc-cal-btn" id="staffCalBtn" onmousedown="arcCalToggle(event,'staff')" tabindex="-1">📅</button>
+          <input type="date" class="arc-hidden-date" id="staffArchiveDate" onchange="arcHiddenChanged('staff')" max=""/>
+        </div>
+        <button class="archive-all-dates active" id="staffArchiveAllBtn" onclick="clearStaffArchiveDate()">All Dates</button>
+        <button class="restore-all-btn" onclick="restoreAllStaff()">↩ Restore All</button>
+      </div>
+    </div>
+    <div class="archive-notice">⏳ Staff records are permanently deleted after <strong>30 days</strong>. Restore anyone you want to keep.</div>
+    <div class="archive-table-wrap">
+      <div style="overflow-x:auto">
+        <table class="archive-table">
+          <thead><tr><th>Staff Member</th><th>Role</th><th>Schedule</th><th>Email</th><th>Expires In</th><th>Archived On</th><th>Action</th></tr></thead>
+          <tbody id="staffArchiveBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /archive-staff -->
+</div><!-- /main -->
+
+<!-- ══ MENU ITEM ADD/EDIT MODAL ══ -->
+<div class="menu-modal-overlay" id="menuModalOverlay">
+  <div class="menu-modal">
+    <div class="menu-modal-head">
+      <h3 id="menuModalTitle">Add Menu Item</h3>
+      <button class="appear-modal-close" onclick="closeMenuModal()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="menu-modal-body">
+      <!-- Image upload -->
+      <div>
+        <label class="form-label">Product Image <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <div id="mnImgPreviewWrap" style="display:none;margin-bottom:6px;">
+          <img id="mnImgPreview" src="" alt="preview" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line);"/>
+          <button type="button" onclick="clearMenuImg()" style="margin-top:4px;font-size:10.5px;color:var(--red);background:none;border:none;cursor:pointer;padding:0;">✕ Remove image</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg);border:1.5px dashed var(--line);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);transition:.15s;" id="mnImgLabel">
+          <span style="font-size:18px;">🖼</span> Click to upload image
+          <input type="file" id="mnImg" accept="image/*" style="display:none" onchange="previewMenuImg(this)"/>
+        </label>
+      </div>
+      <!-- Price preview -->
+      <div class="menu-price-preview">
+        <div class="menu-price-big" id="menuPricePreview">₱0.00</div>
+        <div class="menu-price-label">Selling Price (incl. 12% VAT)</div>
+      </div>
+      <div><label class="form-label">Item Name</label><input class="form-input" id="mnName" placeholder="e.g. Hazelnut Latte"/></div>
+      <div><label class="form-label">Description <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <input class="form-input" id="mnDesc" placeholder="e.g. Rich espresso with hazelnut syrup & steamed milk"/></div>
+      <div class="menu-modal-row2">
+        <div><label class="form-label">Category</label>
+          <select class="form-input" id="mnCat" style="cursor:pointer" onchange="autoFillUnit()">
+            <option value="hot-coffee">☕ Hot Coffee</option>
+            <option value="iced-coffee">🧊 Iced Coffee</option>
+            <option value="espresso">⚡ Espresso</option>
+            <option value="frappe">🥤 Frappe</option>
+            <option value="tea">🍵 Tea</option>
+            <option value="pastries">🥐 Pastries</option>
+            <option value="beans">🫘 Beans</option>
+          </select>
+        </div>
+        <div><label class="form-label">Unit</label>
+          <input class="form-input" id="mnUnit" placeholder="cups / pcs / bags"/>
+        </div>
+      </div>
+      <div class="menu-modal-row2">
+        <div><label class="form-label">Selling Price (₱)</label>
+          <input class="form-input" id="mnPrice" type="number" min="0" step="0.01" value="0" oninput="updateMenuPricePreview()"/>
+        </div>
+        <div><label class="form-label">Cost / COGS (₱)</label>
+          <input class="form-input" id="mnCost" type="number" min="0" step="0.01" value="0"/>
+        </div>
+      </div>
+      <div class="menu-modal-row2">
+        <div><label class="form-label">Availability</label>
+          <select class="form-input" id="mnAvail" style="cursor:pointer">
+            <option value="1">✅ Available</option>
+            <option value="0">🚫 Unavailable</option>
+          </select>
+        </div>
+        <div><label class="form-label">Type</label>
+          <select class="form-input" id="mnType" style="cursor:pointer">
+            <option value="manual">Manual (unlimited)</option>
+            <option value="stock">Tracked (stock)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="menu-modal-footer">
+      <button class="modal-cancel" onclick="closeMenuModal()">Cancel</button>
+      <button class="modal-save" onclick="saveMenuItem()">✓ Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STAFF ADD/EDIT MODAL ══ -->
+<div class="staff-modal-overlay" id="staffModalOverlay">
+  <div class="staff-modal">
+    <div class="staff-modal-head">
+      <h3 id="staffModalTitle">Add Staff Member</h3>
+      <button class="appear-modal-close" onclick="closeStaffModal()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="staff-modal-body">
+      <div style="text-align:center">
+        <div class="staff-avatar-preview" id="staffAvatarPreview">?</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:2px">Avatar auto-generated from initials</div>
+      </div>
+      <div class="staff-modal-row2">
+        <div><label class="form-label">First Name</label><input class="form-input" id="sfFirstName" placeholder="e.g. Maria" oninput="updateStaffPreview()"/></div>
+        <div><label class="form-label">Last Name</label><input class="form-input" id="sfLastName" placeholder="e.g. Santos" oninput="updateStaffPreview()"/></div>
+      </div>
+      <div><label class="form-label">Email Address</label><input class="form-input" id="sfEmail" type="email" placeholder="e.g. maria@triadcoffee.com"/></div>
+      <div><label class="form-label">Phone</label><input class="form-input" id="sfPhone" type="tel" placeholder="e.g. 09XX-XXX-XXXX"/></div>
+      <div class="staff-modal-row2">
+        <div><label class="form-label">Role</label>
+          <select class="form-input" id="sfRole" style="cursor:pointer" onchange="updateStaffPreview()">
+            <option value="Barista">☕ Barista</option>
+            <option value="Cashier">💰 Cashier</option>
+            <option value="Shift Lead">⭐ Shift Lead</option>
+            <option value="Manager">👑 Manager</option>
+          </select>
+        </div>
+        <div><label class="form-label">PIN (4-digit)</label>
+          <div style="position:relative;display:flex;align-items:center;">
+            <input class="form-input" id="sfPin" type="password" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]{4}" style="padding-right:38px;width:100%;"/>
+            <button type="button" onclick="togglePinVisibility()" id="pinToggleBtn" title="Show/Hide PIN" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0;line-height:1;" tabindex="-1">👁</button>
+          </div>
+        </div>
+      </div>
+      <div><label class="form-label">Schedule</label>
+        <select class="form-input" id="sfSchedule" style="cursor:pointer">
+          <option value="Mon–Fri · 7AM–3PM">Mon–Fri · 7AM–3PM</option>
+          <option value="Mon–Fri · 3PM–11PM">Mon–Fri · 3PM–11PM</option>
+          <option value="Tue–Sat · 7AM–3PM">Tue–Sat · 7AM–3PM</option>
+          <option value="Tue–Sat · 3PM–11PM">Tue–Sat · 3PM–11PM</option>
+          <option value="Wed–Sun · 7AM–3PM">Wed–Sun · 7AM–3PM</option>
+          <option value="Wed–Sun · 3PM–11PM">Wed–Sun · 3PM–11PM</option>
+          <option value="Weekends Only">Weekends Only</option>
+          <option value="Flexible / On-Call">Flexible / On-Call</option>
+        </select>
+      </div>
+      <div class="staff-modal-row2">
+        <div><label class="form-label">Status</label>
+          <select class="form-input" id="sfStatus" style="cursor:pointer">
+            <option value="active">✅ Active</option>
+            <option value="inactive">⏸ Inactive</option>
+          </select>
+        </div>
+        <div><label class="form-label">Joined</label>
+          <input class="form-input" id="sfJoined" type="date"/>
+        </div>
+      </div>
+    </div>
+    <div class="staff-modal-footer">
+      <button class="modal-cancel" onclick="closeStaffModal()">Cancel</button>
+      <button class="modal-save" onclick="saveStaffMember()">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STAFF DELETE CONFIRM ══ -->
+<div class="del-confirm-overlay" id="delConfirmOverlay">
+  <div class="del-confirm-box">
+    <div class="del-confirm-icon" id="delConfirmIcon">📦</div>
+    <div class="del-confirm-title" id="delConfirmTitle">Move to Archive</div>
+    <div class="del-confirm-sub" id="delConfirmSub"></div>
+    <div id="delConfirmNote" class="del-confirm-note" style="display:none">📦 Removed items will go to Archive</div>
+    <div class="del-confirm-btns">
+      <button class="del-confirm-cancel" onclick="closeDelConfirm()">Cancel</button>
+      <button class="del-confirm-ok" id="delConfirmOk">Move to Archive</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REFUND CONFIRMATION MODAL ══ -->
+<div class="refund-confirm-overlay" id="refundConfirmOverlay">
+  <div class="refund-confirm-box">
+    <div class="refund-confirm-icon">↩</div>
+    <div class="refund-confirm-title">Confirm Refund</div>
+    <div class="refund-confirm-sub" id="refundConfirmSub">Are you sure you want to refund this order?</div>
+    <div class="refund-confirm-btns">
+      <button class="refund-confirm-cancel" onclick="closeRefundConfirm()">Cancel</button>
+      <button class="refund-confirm-ok" id="refundConfirmOk">↩ Yes, Refund</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RECEIPT MODAL ══ -->
+<div class="receipt-overlay" id="receiptOverlay">
+  <div class="receipt-modal">
+    <div class="receipt-head">
+      <h3>🧾 Receipt</h3>
+      <button class="appear-modal-close" onclick="closeReceipt()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="receipt-body" id="receiptBody"></div>
+    <button class="receipt-print-btn" onclick="window.print()">🖨 Print Receipt</button>
+  </div>
+</div>
+
+<!-- ══ APPEARANCE MODAL ══ -->
+<div class="appear-overlay" id="appearOverlay">
+  <div class="appear-modal">
+    <div class="appear-modal-head">
+      <h3>Appearance</h3>
+      <button class="appear-modal-close" onclick="cancelAppear()">✕</button>
+    </div>
+    <div class="appear-body">
+      <!-- Theme -->
+      <div>
+        <div class="appear-section-lbl">Theme</div>
+        <div class="appear-themes" id="apThemeGrid"></div>
+      </div>
+      <div class="appear-divider"></div>
+      <!-- Brightness & Contrast -->
+      <div>
+        <div class="appear-section-lbl">Brightness &amp; Contrast</div>
+        <div class="appear-slider-row">
+          <span class="appear-slider-lbl">Brightness</span>
+          <input type="range" class="appear-slider" id="apBrightness" min="70" max="130" value="100" oninput="previewBrightness(this.value)"/>
+          <span class="appear-slider-val" id="apBrightnessVal">100%</span>
+        </div>
+        <div class="appear-slider-row">
+          <span class="appear-slider-lbl">Contrast</span>
+          <input type="range" class="appear-slider" id="apContrast" min="70" max="130" value="100" oninput="previewContrast(this.value)"/>
+          <span class="appear-slider-val" id="apContrastVal">100%</span>
+        </div>
+      </div>
+      <div class="appear-divider"></div>
+      <!-- Accent Color -->
+      <div>
+        <div class="appear-section-lbl">Accent Color</div>
+        <div class="appear-accent-row">
+          <div class="appear-accent-preview" id="apAccentPreview"></div>
+          <span class="appear-accent-hint">Coffee-inspired palettes</span>
+        </div>
+        <div class="appear-swatches" id="apSwatches"></div>
+      </div>
+      <!-- Save -->
+      <button class="appear-save-btn" onclick="saveAppear()">✓ Save &amp; Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT/ADD PRODUCT MODAL ══ -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add Product</h3>
+    <div class="modal-grid">
+      <!-- Image upload -->
+      <div>
+        <label class="form-label">Product Image <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <div id="mImgPreviewWrap" style="display:none;margin-bottom:6px;">
+          <img id="mImgPreview" src="" alt="preview" style="width:100%;max-height:120px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line);"/>
+          <button type="button" onclick="clearStockImg()" style="margin-top:4px;font-size:10.5px;color:var(--red);background:none;border:none;cursor:pointer;padding:0;">✕ Remove image</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg);border:1.5px dashed var(--line);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);transition:.15s;" id="mImgLabel">
+          <span style="font-size:18px;">🖼</span> Click to upload image
+          <input type="file" id="mImg" accept="image/*" style="display:none" onchange="previewStockImg(this)"/>
+        </label>
+      </div>
+      <div><label class="form-label">Product Name</label><input class="form-input" id="mName" placeholder="e.g. Oat Milk 1L"/></div>
+      <div class="modal-row2">
+        <div><label class="form-label">Category</label>
+          <select class="form-input" id="mCat" style="cursor:pointer" onchange="autoFillStockUnit()">
+            <option value="hot-coffee">☕ Hot Coffee</option><option value="iced-coffee">🧊 Iced Coffee</option>
+            <option value="espresso">⚡ Espresso</option><option value="frappe">🥤 Frappe</option>
+            <option value="tea">🍵 Tea</option><option value="pastries">🥐 Pastries</option><option value="beans">🫘 Beans</option>
+          </select>
+        </div>
+        <div><label class="form-label">Type</label>
+          <select class="form-input" id="mType" style="cursor:pointer" onchange="toggleStockQtyRow()"><option value="stock">Tracked</option><option value="manual">Manual</option></select>
+        </div>
+      </div>
+      <div class="modal-row2" id="mQtyRow">
+        <div><label class="form-label">Current Qty</label><input class="form-input" id="mQty" type="number" min="0" value="0"/></div>
+        <div><label class="form-label">Alert Threshold</label><input class="form-input" id="mThreshold" type="number" min="0" value="5"/></div>
+      </div>
+      <div class="modal-row2">
+        <div><label class="form-label">Unit</label><input class="form-input" id="mUnit" placeholder="pcs / bags / btls"/></div>
+        <div><label class="form-label">Sell Price (₱)</label><input class="form-input" id="mPrice" type="number" min="0" step="0.01" value="0"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-save" onclick="saveModal()">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ALL PRODUCTS MODAL ══ -->
+<div class="orders-overlay" id="allProductsOverlay">
+  <div class="orders-modal" style="width:min(820px,96vw)">
+    <div class="orders-modal-head">
+      <h3>📦 All Products</h3>
+      <div class="orders-modal-controls">
+        <div class="search-wrap" style="position:relative">
+          <input class="search-input" id="allProdSearch" placeholder="Search…" oninput="renderAllProductsModal()" style="width:140px"/>
+        </div>
+        <select id="allProdCat" onchange="renderAllProductsModal()" style="height:28px;font-size:11.5px;padding:0 8px;border-radius:7px;border:1.5px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer;outline:none;min-width:120px;font-family:inherit">
+          <option value="all">All Categories</option>
+          <option value="hot-coffee">☕ Hot Coffee</option>
+          <option value="iced-coffee">🧊 Iced Coffee</option>
+          <option value="espresso">⚡ Espresso</option>
+          <option value="frappe">🥤 Frappe</option>
+          <option value="tea">🍵 Tea</option>
+          <option value="pastries">🥐 Pastries</option>
+          <option value="beans">🫘 Beans</option>
+        </select>
+        <button class="orders-modal-close" onclick="closeAllProducts()" style="color:var(--text)">✕</button>
+      </div>
+    </div>
+    <div class="orders-modal-body" id="allProductsBody"></div>
+  </div>
+</div>
+
+<!-- ══ NEED RESTOCK MODAL ══ -->
+<div class="restock-overlay" id="restockOverlay">
+  <div class="restock-modal">
+    <div class="restock-modal-head">
+      <h3>⚠️ Products Needing Restock</h3>
+      <button class="appear-modal-close" onclick="closeRestockModal()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="restock-modal-body" id="restockModalBody"></div>
+  </div>
+</div>
+
+<!-- ══ ALL NOTIFICATIONS PANEL ══ -->
+<div class="notif-all-overlay" id="notifAllOverlay">
+  <div class="notif-all-panel">
+    <div class="notif-all-head">
+      <h3>🔔 All Notifications</h3>
+      <button class="appear-modal-close" onclick="closeNotifAll()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="notif-all-body" id="notifAllBody"></div>
+    <button class="notif-footer-clear" onclick="clearAllNotifs()">🗑 Clear All Notifications</button>
+  </div>
+</div>
+
+<!-- ══ AUDIT LOG VIEW ALL ══ -->
+<div class="viewall-overlay" id="auditAllOverlay">
+  <div class="viewall-panel">
+    <div class="viewall-head">
+      <h3>📋 Full Audit Log</h3>
+      <button class="appear-modal-close" onclick="closeAuditAll()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="viewall-body" id="auditAllBody"></div>
+  </div>
+</div>
+
+<!-- ══ ALERTS VIEW ALL ══ -->
+<div class="viewall-overlay" id="alertsAllOverlay">
+  <div class="viewall-panel">
+    <div class="viewall-head">
+      <h3>🚨 All Alerts</h3>
+      <button class="appear-modal-close" onclick="closeAlertsAll()" style="color:var(--text)">✕</button>
+    </div>
+    <div class="viewall-body" id="alertsAllBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ PROFILE MODAL ══ -->
+<div class="profile-overlay" id="profileOverlay">
+  <div class="profile-modal">
+    <div class="profile-modal-head">
+      <h3>👤 My Profile</h3>
+      <button class="appear-modal-close" onclick="closeProfileModal()">✕</button>
+    </div>
+    <div class="profile-avatar-row">
+      <div class="profile-ava-big" id="profileAvaDisplay">🧑‍💼</div>
+      <div class="profile-owner-lbl">Owner</div>
+    </div>
+    <!-- Avatar character choices -->
+    <div style="padding:0 18px 4px;">
+      <div class="form-label" style="margin-bottom:8px;">Choose your avatar</div>
+      <div class="profile-avatar-choices" id="profileAvatarChoices">
+        <div class="pav-choice selected" data-avatar="🧑‍💼" onclick="selectAvatar(this)">🧑‍💼</div>
+        <div class="pav-choice" data-avatar="👨‍💼" onclick="selectAvatar(this)">👨‍💼</div>
+        <div class="pav-choice" data-avatar="👩‍💼" onclick="selectAvatar(this)">👩‍💼</div>
+        <div class="pav-choice" data-avatar="🧔" onclick="selectAvatar(this)">🧔</div>
+        <div class="pav-choice" data-avatar="👱‍♂️" onclick="selectAvatar(this)">👱‍♂️</div>
+        <div class="pav-choice" data-avatar="👱‍♀️" onclick="selectAvatar(this)">👱‍♀️</div>
+        <div class="pav-choice" data-avatar="🧕" onclick="selectAvatar(this)">🧕</div>
+        <div class="pav-choice" data-avatar="👨‍🍳" onclick="selectAvatar(this)">👨‍🍳</div>
+        <div class="pav-choice" data-avatar="👩‍🍳" onclick="selectAvatar(this)">👩‍🍳</div>
+        <div class="pav-choice" data-avatar="🦸‍♂️" onclick="selectAvatar(this)">🦸‍♂️</div>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div><label class="form-label">Full Name</label>
+        <input class="form-input" id="profileNameInput" placeholder="Your name"/>
+      </div>
+      <button class="profile-save-btn" onclick="saveProfile()">✓ Save Changes</button>
+      <button class="profile-changepw-btn" onclick="openChangePassword()">🔒 Change Password</button>
+      <button class="profile-logout-btn" onclick="logOut()">⏻ Log Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ACTIVITY REMINDER MODAL ══ -->
+<div id="actReminderOverlay" style="
+  position:fixed;inset:0;z-index:1100;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.78);backdrop-filter:blur(7px);">
+
+  <div id="actReminderBox" class="reminder-box">
+    <!-- Pulsing ring behind the box -->
+    <div class="reminder-ring"></div>
+
+    <!-- Header bar -->
+    <div class="reminder-head">
+      <div class="reminder-clock-wrap">
+        <span class="reminder-clock" id="reminderClockEmoji">⏰</span>
+      </div>
+      <div class="reminder-head-label">⚠ SCHEDULED ACTIVITY REMINDER</div>
+    </div>
+
+    <!-- Body -->
+    <div class="reminder-body">
+      <div id="actReminderTitle" class="reminder-title"></div>
+      <div id="actReminderTime"  class="reminder-time"></div>
+      <div id="actReminderNote"  class="reminder-note"></div>
+
+      <button class="reminder-btn-confirm" onclick="actReminderConfirm()">
+        ✅ Done — I've completed this
+      </button>
+      <button class="reminder-btn-snooze" onclick="actReminderSnooze()">
+        ⏱ Remind me in 5 minutes
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../triad-db.js"></script>
+<script src="owner.js"></script>
+</body>
+</html>

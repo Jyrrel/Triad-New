@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triad Coffee — POS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:    #0f0d0b;
+  --surf:  #161210;
+  --card:  #1e1a16;
+  --cardh: #252018;
+  --bdr:   rgba(255,255,255,0.07);
+  --bdr2:  rgba(255,255,255,0.15);
+  --acc:   #c8622a;
+  --acc2:  #e07840;
+  --txt:   #f0ebe4;
+  --txt2:  #9a8878;
+  --txt3:  #5a4a3a;
+  --grn:   #4caf7d;
+  --ewl:   #7c5cbf;
+  --red:   #e05050;
+}
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--txt); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* TOPBAR */
+.topbar { height:50px; flex-shrink:0; background:var(--surf); border-bottom:1px solid var(--bdr); display:flex; align-items:center; padding:0 16px; gap:10px; }
+.brand { display:flex; align-items:center; gap:8px; font-family:'Playfair Display',serif; font-size:17px; font-weight:700; }
+.brand-ico { width:28px; height:28px; border-radius:7px; background:var(--acc); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.tsp { flex:1; }
+.tchip { display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--bdr); border-radius:18px; padding:3px 12px 3px 3px; font-size:12px; font-weight:500; color:var(--txt2); }
+.tav { width:24px; height:24px; border-radius:50%; background:var(--acc); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
+.ttime { background:var(--card); border:1px solid var(--bdr); border-radius:7px; padding:4px 12px; font-size:13px; font-weight:700; color:var(--acc2); font-variant-numeric:tabular-nums; }
+.tb-back { background:var(--card); border:1.5px solid var(--bdr); border-radius:7px; padding:5px 12px; font-size:11px; font-weight:600; color:var(--txt2); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; text-decoration:none; display:flex; align-items:center; gap:5px; }
+.tb-back:hover { border-color:var(--bdr2); color:var(--txt); }
+
+/* LAYOUT */
+.layout { display:flex; flex:1; overflow:hidden; }
+
+/* MENU PANEL */
+.mside { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+.catbar { display:flex; gap:6px; padding:10px 14px; overflow-x:auto; flex-shrink:0; background:var(--surf); border-bottom:1px solid var(--bdr); scrollbar-width:none; }
+.catbar::-webkit-scrollbar { display:none; }
+.cat { display:flex; align-items:center; gap:5px; padding:7px 14px; border-radius:20px; border:1.5px solid var(--bdr); background:transparent; color:var(--txt2); font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; transition:all .18s; font-family:'DM Sans',sans-serif; flex-shrink:0; }
+.cat:hover { border-color:var(--acc); color:var(--txt); }
+.cat.active { background:var(--acc); border-color:var(--acc); color:#fff; }
+
+.searchbar { padding:10px 14px; flex-shrink:0; }
+.swrap { position:relative; }
+.swrap input { width:100%; background:var(--card); border:1.5px solid var(--bdr); border-radius:9px; padding:9px 12px 9px 36px; color:var(--txt); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s; }
+.swrap input::placeholder { color:var(--txt3); }
+.swrap input:focus { border-color:var(--acc); }
+.sico { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--txt3); font-size:13px; pointer-events:none; }
+
+.mgrid-wrap { flex:1; overflow-y:auto; padding:6px 14px 14px; scrollbar-width:thin; scrollbar-color:var(--card) transparent; }
+.mgrid-wrap::-webkit-scrollbar { width:4px; }
+.mgrid-wrap::-webkit-scrollbar-thumb { background:var(--card); border-radius:4px; }
+.mgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+
+.mc { background:var(--card); border:1.5px solid var(--bdr); border-radius:12px; overflow:hidden; cursor:pointer; transition:all .2s; position:relative; display:flex; flex-direction:column; }
+.mc:hover { border-color:var(--acc); transform:translateY(-2px); box-shadow:0 8px 22px rgba(200,98,42,0.18); }
+.mc.kbf { border-color:var(--acc2)!important; box-shadow:0 0 0 3px rgba(200,98,42,0.35)!important; transform:translateY(-2px)!important; }
+.mc:active { transform:scale(0.97); }
+.mci { width:100%; height:108px; object-fit:cover; display:block; }
+.mcip { width:100%; height:108px; background:linear-gradient(135deg,#2a2018,#181410); display:flex; align-items:center; justify-content:center; font-size:34px; }
+.btag { position:absolute; top:7px; left:7px; background:var(--acc); color:#fff; font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; letter-spacing:.5px; text-transform:uppercase; }
+.cart-qty-badge { position:absolute; top:6px; right:6px; background:var(--acc); color:#fff; font-size:10px; font-weight:800; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.mcb { padding:8px 10px 10px; flex:1; display:flex; flex-direction:column; }
+.mcn { font-size:12px; font-weight:700; margin-bottom:2px; line-height:1.3; }
+.mcd { font-size:10px; color:var(--txt3); line-height:1.4; margin-bottom:8px; flex:1; }
+.mcf { display:flex; align-items:center; justify-content:space-between; }
+.mcp { font-size:14px; font-weight:800; }
+.mcbtn { background:var(--acc); color:#fff; border:none; border-radius:6px; padding:5px 11px; font-size:11px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; }
+.mcbtn:hover { background:var(--acc2); }
+.mcbtn.added { background:transparent; border:1.5px solid var(--acc); color:var(--acc); padding:4px 7px; font-size:10px; }
+
+/* ORDER PANEL */
+.oside { width:320px; flex-shrink:0; background:var(--surf); border-left:1px solid var(--bdr); display:flex; flex-direction:column; overflow:hidden; }
+.ohdr { padding:12px 14px 10px; flex-shrink:0; border-bottom:1px solid var(--bdr); }
+.otitle { font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.onum { font-size:12px; font-weight:500; color:var(--txt2); }
+.clr-ord-btn { background:transparent; border:1.5px solid var(--bdr); border-radius:6px; padding:3px 9px; color:var(--txt3); font-size:10px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; }
+.clr-ord-btn:hover { border-color:var(--red); color:var(--red); }
+.flbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:3px; }
+.finp { width:100%; background:#0d0b09; border:1.5px solid var(--bdr); border-radius:7px; padding:7px 10px; color:var(--txt); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s; margin-bottom:8px; }
+.finp::placeholder { color:var(--txt3); }
+.finp:focus { border-color:var(--acc); }
+.prow { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+.pinp { flex:1; background:#0d0b09; border:1.5px solid var(--bdr); border-radius:7px; padding:6px; color:var(--txt); font-size:13px; font-weight:700; font-family:'DM Sans',sans-serif; outline:none; text-align:center; }
+.pmb { width:30px; height:30px; border-radius:7px; background:var(--card); border:1.5px solid var(--bdr); color:var(--txt); font-size:16px; cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; transition:all .18s; flex-shrink:0; }
+.pmb:hover { background:var(--acc); border-color:var(--acc); }
+.otyp { display:flex; gap:5px; }
+.otb { flex:1; padding:7px 3px; border-radius:8px; border:1.5px solid var(--bdr); background:var(--card); color:var(--txt2); font-size:10px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; display:flex; align-items:center; justify-content:center; gap:3px; }
+.otb:hover { border-color:var(--bdr2); color:var(--txt); }
+.otb.active { background:var(--acc); border-color:var(--acc); color:#fff; }
+
+/* CART */
+.oitems { flex:1; overflow-y:auto; padding:0 14px; min-height:0; scrollbar-width:thin; scrollbar-color:var(--card) transparent; }
+.oitems::-webkit-scrollbar { width:3px; }
+.oitems::-webkit-scrollbar-thumb { background:var(--card); border-radius:3px; }
+.eord { display:flex; flex-direction:column; align-items:center; justify-content:center; height:80px; gap:4px; color:var(--txt3); font-size:13px; font-weight:500; }
+.oi { display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--bdr); animation:fi .2s ease; }
+@keyframes fi { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:none} }
+.oi:last-child { border-bottom:none; }
+.oiimg { width:38px; height:38px; border-radius:7px; object-fit:cover; background:var(--card); flex-shrink:0; }
+.oiiph { width:38px; height:38px; border-radius:7px; background:linear-gradient(135deg,#2a2018,#181410); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.oiinf { flex:1; min-width:0; }
+.oiinf .n { font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.oiinf .s { font-size:10px; color:var(--txt2); margin-top:1px; }
+.oictrl { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.qb { width:24px; height:24px; border-radius:6px; border:none; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; font-family:'DM Sans',sans-serif; }
+.qb.m { background:rgba(255,255,255,0.07); color:var(--txt2); }
+.qb.m:hover { background:rgba(200,98,42,0.3); color:var(--acc2); }
+.qb.p { background:var(--acc); color:#fff; }
+.qb.p:hover { background:var(--acc2); }
+.qn { font-size:12px; font-weight:700; min-width:18px; text-align:center; }
+.qdl { background:transparent; border:none; color:var(--txt3); cursor:pointer; font-size:14px; transition:color .15s; padding:2px; line-height:1; }
+.qdl:hover { color:var(--red); }
+
+/* TOTALS */
+.totblk { padding:8px 14px; border-top:1px solid var(--bdr); background:rgba(0,0,0,0.2); flex-shrink:0; }
+.tr { display:flex; justify-content:space-between; font-size:11px; color:var(--txt2); font-weight:500; margin-bottom:3px; }
+.tr.g { font-size:15px; font-weight:800; color:var(--txt); margin-top:6px; margin-bottom:0; padding-top:6px; border-top:1px solid var(--bdr2); }
+.tr.g span:last-child { color:var(--acc2); }
+.dv { color:#f07070; }
+
+/* NUMPAD */
+.npblk { padding:8px 14px 6px; border-top:1px solid var(--bdr); flex-shrink:0; transition:opacity .2s; }
+.clbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:4px; }
+.cdisp { background:#0d0b09; border:1.5px solid var(--bdr); border-radius:8px; padding:6px 12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; }
+.csym { font-size:12px; color:var(--txt3); font-weight:600; }
+.cval { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.chrow { font-size:11px; font-weight:700; margin-bottom:5px; min-height:16px; color:var(--grn); }
+.np { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-bottom:8px; }
+.nb { background:var(--card); border:1.5px solid var(--bdr); border-radius:9px; padding:11px 6px; text-align:center; font-size:16px; font-weight:700; cursor:pointer; color:var(--txt); transition:all .15s; font-family:'DM Sans',sans-serif; user-select:none; }
+.nb:hover { background:var(--cardh); border-color:var(--bdr2); }
+.nb:active { transform:scale(0.92); }
+.nb.clr { font-size:11px; font-weight:800; color:var(--red); background:rgba(224,80,80,0.08); border-color:rgba(224,80,80,0.2); }
+.nb.clr:hover { background:rgba(224,80,80,0.18); border-color:var(--red); }
+.nb.del { color:var(--acc2); }
+.nb.del:hover { background:rgba(200,98,42,0.12); border-color:var(--acc); }
+
+/* PAYMENT + ACTIONS */
+.acts { padding:0 14px 10px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+.pmeth { display:flex; gap:5px; }
+.pm { flex:1; padding:8px 4px; border-radius:8px; border:1.5px solid var(--bdr); background:var(--card); color:var(--txt2); font-size:11px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; display:flex; align-items:center; justify-content:center; gap:4px; }
+.pm:hover { border-color:var(--bdr2); color:var(--txt); }
+.pm.active { border-color:var(--acc); color:var(--acc); background:rgba(200,98,42,0.1); }
+.pm.ewl.active { border-color:var(--ewl); color:var(--ewl); background:rgba(124,92,191,0.1); }
+.pm.card.active { border-color:#3b82f6; color:#3b82f6; background:rgba(59,130,246,0.1); }
+.paybtn { padding:13px; border-radius:11px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:800; transition:all .2s; background:var(--acc); color:#fff; box-shadow:0 6px 20px rgba(200,98,42,0.4); letter-spacing:.02em; width:100%; }
+.paybtn:hover:not(:disabled) { background:var(--acc2); transform:translateY(-1px); box-shadow:0 8px 26px rgba(200,98,42,0.5); }
+.paybtn:active:not(:disabled) { transform:translateY(0); }
+.paybtn:disabled { opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; }
+.sbtns { display:flex; gap:5px; }
+.sbtn { flex:1; padding:8px 4px; border-radius:8px; border:1.5px solid var(--bdr); background:transparent; color:var(--txt2); font-size:10px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; display:flex; align-items:center; justify-content:center; gap:4px; }
+.sbtn:hover { border-color:var(--bdr2); color:var(--txt); background:var(--card); }
+.sbtn.disc-on { border-color:#f59e0b; color:#f59e0b; background:rgba(245,158,11,0.08); }
+
+/* MODALS */
+.ovl { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .3s; backdrop-filter:blur(4px); }
+.ovl.open { opacity:1; pointer-events:all; }
+.mdl { background:var(--surf); border:2px solid var(--acc); border-radius:20px; padding:28px 28px 24px; max-width:330px; width:92%; text-align:center; transform:scale(.88); transition:transform .3s cubic-bezier(.34,1.56,.64,1); box-shadow:0 24px 60px rgba(0,0,0,0.6); }
+.ovl.open .mdl { transform:scale(1); }
+.mic { font-size:54px; margin-bottom:10px; }
+.mttl { font-family:'Playfair Display',serif; font-size:22px; font-weight:800; margin-bottom:4px; }
+.msub { font-size:12px; color:var(--txt2); margin-bottom:16px; }
+.mrows { background:rgba(255,255,255,0.04); border-radius:10px; padding:12px 14px; margin-bottom:16px; text-align:left; border:1px solid var(--bdr); }
+.mr { display:flex; justify-content:space-between; font-size:12px; color:var(--txt2); font-weight:500; margin-bottom:5px; }
+.mr:last-child { margin-bottom:0; font-size:13px; font-weight:700; color:var(--txt); padding-top:7px; border-top:1px solid var(--bdr); }
+.mr span:last-child { color:var(--acc2); }
+.mbtns { display:flex; gap:8px; }
+.mbtn { flex:1; background:var(--acc); color:#fff; border:none; border-radius:10px; padding:11px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+.mbtn:hover { background:var(--acc2); }
+.mbtn.sec { background:transparent; border:1.5px solid var(--bdr2); color:var(--txt2); }
+.mbtn.sec:hover { border-color:var(--acc); color:var(--acc); }
+
+/* DISCOUNT MODAL */
+.disc-mdl { background:var(--surf); border:2px solid #f59e0b; border-radius:18px; padding:24px; max-width:300px; width:92%; text-align:center; transform:scale(.88); transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+.ovl.open .disc-mdl { transform:scale(1); }
+.disc-mdl h3 { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; margin-bottom:6px; }
+.disc-mdl p { font-size:12px; color:var(--txt2); margin-bottom:14px; }
+.disc-opts { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.disc-opt { display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1.5px solid var(--bdr); border-radius:9px; padding:10px 14px; cursor:pointer; transition:all .18s; }
+.disc-opt:hover { border-color:#f59e0b; }
+.disc-opt.active { border-color:#f59e0b; background:rgba(245,158,11,0.08); }
+.disc-opt-label { font-size:12px; font-weight:700; text-align:left; }
+.disc-opt-pct { font-size:16px; font-weight:800; color:#f59e0b; flex-shrink:0; }
+.disc-mdl-btns { display:flex; gap:8px; }
+.disc-mdl-btn { flex:1; padding:10px; border-radius:9px; border:none; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all .18s; }
+.disc-mdl-btn.apply { background:#f59e0b; color:#0f0d0b; }
+.disc-mdl-btn.apply:hover { background:#fbbf24; }
+.disc-mdl-btn.cancel { background:var(--card); border:1.5px solid var(--bdr); color:var(--txt2); }
+.disc-mdl-btn.cancel:hover { border-color:var(--bdr2); color:var(--txt); }
+
+/* NOTIFICATION */
+.notif { position:fixed; top:58px; right:14px; background:#1a3a25; border:1.5px solid var(--grn); color:var(--txt); padding:9px 16px; border-radius:10px; font-size:12px; font-weight:600; transform:translateX(160%); transition:transform .3s cubic-bezier(.34,1.56,.64,1); z-index:200; display:flex; align-items:center; gap:7px; max-width:230px; }
+.notif.err { background:#3a1a1a; border-color:var(--red); }
+.notif.warn { background:#3a2e10; border-color:#f59e0b; }
+.notif.show { transform:translateX(0); }
+
+/* KEYBOARD BAR */
+.kbbar { position:fixed; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; background:rgba(0,0,0,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:28px; padding:5px 16px; z-index:20; pointer-events:none; flex-wrap:wrap; justify-content:center; }
+.kbi { display:flex; align-items:center; gap:3px; font-size:9px; color:var(--txt3); font-weight:600; }
+.kk { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18); border-radius:4px; padding:1px 5px; font-size:9px; color:rgba(255,255,255,0.6); font-family:monospace; }
+.ksep { color:rgba(255,255,255,0.1); font-size:12px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="brand-ico">☕</div>Triad Coffee</div>
+  <div class="tsp"></div>
+  <a href="staff.html" class="tb-back">← Staff</a>
+  <div class="tchip"><div class="tav" id="topAv">MS</div><span id="topStaff">Maria Santos · Counter 1</span></div>
+  <div class="ttime" id="clock">--:--</div>
+</div>
+
+<div class="layout">
+
+  <!-- MENU -->
+  <div class="mside">
+    <div class="catbar" id="catRow"></div>
+    <div class="searchbar">
+      <div class="swrap">
+        <span class="sico">🔍</span>
+        <input id="srch" type="text" placeholder="Search menu… (press / to focus)">
+      </div>
+    </div>
+    <div class="mgrid-wrap">
+      <div class="mgrid" id="mgrid"></div>
+    </div>
+  </div>
+
+  <!-- ORDER PANEL -->
+  <div class="oside">
+    <div class="ohdr">
+      <div class="otitle">
+        <span>Current Order <span class="onum" id="onum">#001</span></span>
+        <button class="clr-ord-btn" onclick="clrOrd()">✕ Clear</button>
+      </div>
+      <div class="flbl">Customer Name</div>
+      <input class="finp" id="cname" type="text" placeholder="e.g. Juan dela Cruz">
+      <div class="flbl">Persons</div>
+      <div class="prow">
+        <button class="pmb" onclick="adjP(-1)">−</button>
+        <input class="pinp" id="pval" value="1" readonly>
+        <button class="pmb" onclick="adjP(1)">+</button>
+      </div>
+      <div class="flbl">Order Type</div>
+      <div class="otyp">
+        <button class="otb active" id="otDine" onclick="setTyp('dine')">🍽️ Dine In</button>
+        <button class="otb" id="otTake" onclick="setTyp('take')">🥡 Take Out</button>
+        <button class="otb" id="otDel"  onclick="setTyp('del')">🛵 Delivery</button>
+      </div>
+    </div>
+
+    <div class="oitems" id="oitems">
+      <div class="eord">☕<br>No items yet</div>
+    </div>
+
+    <div class="totblk">
+      <div class="tr"><span>Subtotal</span><span id="tsub">₱0.00</span></div>
+      <div class="tr"><span>Discount</span><span class="dv" id="tdisc">-₱0.00</span></div>
+      <div class="tr"><span>VAT (12%)</span><span id="tvat">₱0.00</span></div>
+      <div class="tr g"><span>TOTAL</span><span id="ttot">₱0.00</span></div>
+    </div>
+
+    <div class="npblk" id="npblk">
+      <div class="clbl">Cash Tendered</div>
+      <div class="cdisp">
+        <span class="csym">₱</span>
+        <span class="cval" id="cval">0.00</span>
+      </div>
+      <div class="chrow" id="chrow"></div>
+      <div class="np" id="npgrid"></div>
+    </div>
+
+    <div class="acts">
+      <div class="pmeth">
+        <button class="pm active" id="pmCash" onclick="setPM('cash')">💵 Cash</button>
+        <button class="pm ewl"    id="pmEwl"  onclick="setPM('ewl')">📱 E-Wallet</button>
+        <button class="pm card"   id="pmCard" onclick="setPM('card')">💳 Card</button>
+      </div>
+      <button class="paybtn" id="paybtn" onclick="pay()" disabled>Continue to Payment — ₱0.00</button>
+      <div class="sbtns">
+        <button class="sbtn" onclick="clrOrd()">🗑 Clear</button>
+        <button class="sbtn" id="discBtn" onclick="openDiscModal()">🏷 Discount</button>
+        <button class="sbtn" onclick="printR()">🖨 Receipt</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER COMPLETE MODAL -->
+<div class="ovl" id="modal">
+  <div class="mdl">
+    <div class="mic">🎉</div>
+    <div class="mttl">Order Complete!</div>
+    <div class="msub" id="msub">Thank you!</div>
+    <div class="mrows" id="mrows"></div>
+    <div class="mbtns">
+      <button class="mbtn sec" onclick="printAfterPay()">🖨 Print</button>
+      <button class="mbtn" onclick="closeM()">New Order →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DISCOUNT MODAL -->
+<div class="ovl" id="discModal">
+  <div class="disc-mdl">
+    <div style="font-size:30px;margin-bottom:8px;">🏷</div>
+    <h3>Apply Discount</h3>
+    <p>Select a discount type for this order.</p>
+    <div class="disc-opts">
+      <div class="disc-opt" data-pct="5"  onclick="selectDisc(this)"><span class="disc-opt-label">Senior / PWD</span><span class="disc-opt-pct">5%</span></div>
+      <div class="disc-opt" data-pct="10" onclick="selectDisc(this)"><span class="disc-opt-label">Student</span><span class="disc-opt-pct">10%</span></div>
+      <div class="disc-opt" data-pct="20" onclick="selectDisc(this)"><span class="disc-opt-label">Loyalty / VIP</span><span class="disc-opt-pct">20%</span></div>
+      <div class="disc-opt" data-pct="0"  onclick="selectDisc(this)"><span class="disc-opt-label">Remove Discount</span><span class="disc-opt-pct" style="color:var(--txt3)">—</span></div>
+    </div>
+    <div class="disc-mdl-btns">
+      <button class="disc-mdl-btn cancel" onclick="closeDiscModal()">Cancel</button>
+      <button class="disc-mdl-btn apply"  onclick="applyDisc()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"><span id="ntxt"></span></div>
+
+<div class="kbbar">
+  <div class="kbi"><span class="kk">↑↓←→</span>Navigate</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">Enter</span>Add/Pay</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">0–9</span>Cash</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">⌫</span>Del</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">Tab</span>Category</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">F1</span>Charge</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">F2</span>Clear</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">F3</span>Discount</div><span class="ksep">|</span>
+  <div class="kbi"><span class="kk">/</span>Search</div>
+</div>
+
+<script>
+const CATS=['All','Hot Coffee','Iced Coffee','Espresso','Frappe','Tea','Pastries','Beans'];
+const CITEMS=[
+  {id:1, name:'Caramel Latte',     cat:'Hot Coffee', desc:'Espresso with steamed milk & caramel drizzle', price:195,best:true, img:'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=70'},
+  {id:2, name:'Americano',         cat:'Hot Coffee', desc:'Bold espresso shots with hot water',            price:160,best:false,img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=70'},
+  {id:3, name:'Cappuccino',        cat:'Hot Coffee', desc:'Classic espresso with creamy foam',             price:175,best:true, img:'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&q=70'},
+  {id:4, name:'Mocha Latte',       cat:'Hot Coffee', desc:'Espresso with chocolate & steamed milk',        price:185,best:true, img:'https://images.unsplash.com/photo-1578374173705-969cbe6f2d6b?w=400&q=70'},
+  {id:5, name:'Matcha Latte',      cat:'Hot Coffee', desc:'Smooth matcha with steamed milk',               price:190,best:false,img:'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&q=70'},
+  {id:6, name:'Flat White',        cat:'Hot Coffee', desc:'Velvety microfoam over double ristretto',       price:180,best:false,img:'https://images.unsplash.com/photo-1592663527359-cf6642f54cff?w=400&q=70'},
+  {id:7, name:'Iced Latte',        cat:'Iced Coffee',desc:'Chilled espresso with milk and ice',            price:185,best:true, img:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=70'},
+  {id:8, name:'Vanilla Cold Brew', cat:'Iced Coffee',desc:'Smooth cold brew with vanilla syrup',           price:195,best:true, img:'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&q=70'},
+  {id:9, name:'Iced Mocha',        cat:'Iced Coffee',desc:'Espresso, chocolate, milk on ice',              price:190,best:false,img:'https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=400&q=70'},
+  {id:10,name:'Iced Caramel Mac',  cat:'Iced Coffee',desc:'Espresso & caramel sauce over iced milk',       price:200,best:false,img:'https://images.unsplash.com/photo-1485808191679-5f86510bd9d4?w=400&q=70'},
+  {id:11,name:'Single Espresso',   cat:'Espresso',   desc:'Rich and bold espresso shot',                   price:120,best:false,img:'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400&q=70'},
+  {id:12,name:'Double Espresso',   cat:'Espresso',   desc:'Extra strong double espresso shot',             price:145,best:false,img:'https://images.unsplash.com/photo-1521302080334-4bebac2763a6?w=400&q=70'},
+  {id:13,name:'Macchiato',         cat:'Espresso',   desc:'Espresso with a spot of steamed milk foam',     price:155,best:true, img:'https://images.unsplash.com/photo-1485808191679-5f86510bd9d4?w=400&q=70'},
+  {id:14,name:'Caramel Frappe',    cat:'Frappe',     desc:'Blended caramel ice coffee with whipped cream', price:210,best:true, img:'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&q=70'},
+  {id:15,name:'Mocha Frappe',      cat:'Frappe',     desc:'Rich chocolatey blended coffee drink',          price:210,best:false,img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=70'},
+  {id:16,name:'Vanilla Frappe',    cat:'Frappe',     desc:'Smooth vanilla blended ice coffee',             price:200,best:false,img:'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?w=400&q=70'},
+  {id:17,name:'Matcha Tea',        cat:'Tea',        desc:'Ceremonial grade matcha, hot or iced',          price:165,best:false,img:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=70'},
+  {id:18,name:'Chamomile Honey',   cat:'Tea',        desc:'Soothing chamomile with raw honey',             price:150,best:false,img:'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&q=70'},
+  {id:19,name:'Butter Croissant',  cat:'Pastries',   desc:'Flaky golden French-style croissant',           price:120,best:true, img:'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=70'},
+  {id:20,name:'Blueberry Muffin',  cat:'Pastries',   desc:'Moist muffin packed with blueberries',          price:110,best:false,img:'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400&q=70'},
+  {id:21,name:'Cinnamon Roll',     cat:'Pastries',   desc:'Soft roll with cinnamon & cream cheese glaze',  price:135,best:true, img:'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=400&q=70'},
+  {id:22,name:'Chocolate Cake',    cat:'Pastries',   desc:'Rich dark chocolate slice with ganache',        price:155,best:false,img:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=70'},
+  {id:23,name:'Ethiopian Yirgacheffe', cat:'Beans',   desc:'Bright and fruity single-origin beans',         price:450,best:true, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&q=70'},
+  {id:24,name:'Colombian Supremo', cat:'Beans',      desc:'Balanced and nutty medium roast',               price:400,best:false,img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&q=70'},
+  {id:25,name:'Guatemala Antigua', cat:'Beans',      desc:'Spicy and chocolatey dark roast',               price:420,best:false,img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&q=70'},
+];
+
+let aCat='All',cart=[],cashStr='',ordTyp='dine',discPct=0,payM='cash',prsns=1,ordN=1,focIdx=-1,filt=[],selDiscPct=0;
+
+function init(){
+  buildCats(); renderMenu(); buildNP();
+  tick(); setInterval(tick,1000);
+  document.getElementById('srch').addEventListener('input',()=>{focIdx=-1;renderMenu();});
+  try{
+    const sn=localStorage.getItem('triad_staff_name');
+    const si=localStorage.getItem('triad_staff_initials');
+    if(sn) document.getElementById('topStaff').textContent=sn+' · Counter 1';
+    if(si) document.getElementById('topAv').textContent=si;
+  }catch(e){}
+}
+function tick(){ document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}); }
+
+function catIco(c){ return{All:'☕','Hot Coffee':'♨️','Iced Coffee':'🧊',Espresso:'⚡',Frappe:'🥤',Tea:'🍵',Pastries:'🥐',Beans:'🫘'}[c]||''; }
+function buildCats(){
+  document.getElementById('catRow').innerHTML=CATS.map(c=>`<button class="cat ${c===aCat?'active':''}" onclick="setCat('${c}')">${catIco(c)} ${c}</button>`).join('');
+}
+function setCat(c){ aCat=c; focIdx=-1; buildCats(); renderMenu(); }
+
+function renderMenu(kf=false){
+  const q=document.getElementById('srch').value.toLowerCase();
+  filt=CITEMS.filter(m=>(aCat==='All'||m.cat===aCat)&&m.name.toLowerCase().includes(q));
+  if(!kf) focIdx=-1;
+  if(focIdx>=filt.length) focIdx=filt.length-1;
+  const inCart={};
+  cart.forEach(o=>{inCart[o.id]=o.qty;});
+  document.getElementById('mgrid').innerHTML=filt.map((item,i)=>`
+    <div class="mc ${i===focIdx?'kbf':''}" id="mc-${i}" onclick="addItem(${item.id})">
+      ${item.best?'<div class="btag">★ BEST</div>':''}
+      ${inCart[item.id]?`<div class="cart-qty-badge">${inCart[item.id]}</div>`:''}
+      <img class="mci" src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.outerHTML='<div class=mcip>☕</div>'">
+      <div class="mcb">
+        <div class="mcn">${item.name}</div>
+        <div class="mcd">${item.desc}</div>
+        <div class="mcf">
+          <div class="mcp">₱${item.price}</div>
+          <button class="mcbtn ${inCart[item.id]?'added':''}" onclick="event.stopPropagation();addItem(${item.id})">
+            ${inCart[item.id]?`✓ ${inCart[item.id]}`:'Add'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  if(focIdx>=0){const el=document.getElementById(`mc-${focIdx}`);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});}
+}
+
+function addItem(id){
+  const item=CITEMS.find(m=>m.id===id);
+  const ex=cart.find(o=>o.id===id);
+  if(ex) ex.qty++; else cart.push({...item,qty:1});
+  renderOrd(); renderMenu(true);
+  notify(`☕ ${item.name} added!`);
+}
+function adjQ(id,d){
+  const i=cart.findIndex(o=>o.id===id); if(i===-1) return;
+  cart[i].qty+=d;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  renderOrd(); renderMenu(true);
+}
+function renderOrd(){
+  const el=document.getElementById('oitems');
+  if(!cart.length){ el.innerHTML='<div class="eord">☕<br>No items yet</div>'; }
+  else el.innerHTML=cart.map(o=>`
+    <div class="oi">
+      <img class="oiimg" src="${o.img}" alt="${o.name}" onerror="this.outerHTML='<div class=oiiph>☕</div>'">
+      <div class="oiinf">
+        <div class="n">${o.name}</div>
+        <div class="s">₱${o.price} × ${o.qty} = <strong style="color:var(--txt)">₱${(o.price*o.qty).toFixed(2)}</strong></div>
+      </div>
+      <div class="oictrl">
+        <button class="qb m" onclick="adjQ(${o.id},-1)">−</button>
+        <span class="qn">${o.qty}</span>
+        <button class="qb p" onclick="adjQ(${o.id},1)">+</button>
+        <button class="qdl" onclick="adjQ(${o.id},-999)" title="Remove">✕</button>
+      </div>
+    </div>
+  `).join('');
+  calcTot();
+}
+
+function getTots(){
+  const sub=cart.reduce((s,o)=>s+o.price*o.qty,0);
+  const disc=discPct>0?Math.round(sub*(discPct/100)):0;
+  const net=sub-disc; const vat=net*0.12; const tot=net+vat;
+  return{sub,disc,vat,tot};
+}
+function calcTot(){
+  const{sub,disc,vat,tot}=getTots();
+  document.getElementById('tsub').textContent=`₱${sub.toFixed(2)}`;
+  document.getElementById('tdisc').textContent=`-₱${disc.toFixed(2)}`;
+  document.getElementById('tvat').textContent=`₱${vat.toFixed(2)}`;
+  document.getElementById('ttot').textContent=`₱${tot.toFixed(2)}`;
+  const pb=document.getElementById('paybtn');
+  pb.textContent=`Continue to Payment — ₱${tot.toFixed(2)}`;
+  pb.disabled=!cart.length;
+  updChg();
+}
+function updChg(){
+  const{tot}=getTots(); const cash=parseFloat(cashStr)||0;
+  const el=document.getElementById('chrow');
+  if(cash>0&&payM==='cash'){
+    const ch=cash-tot;
+    el.textContent=ch>=0?`✓ Change: ₱${ch.toFixed(2)}`:`⚠ Short by ₱${Math.abs(ch).toFixed(2)}`;
+    el.style.color=ch>=0?'var(--grn)':'#e07070';
+  } else el.textContent='';
+}
+
+function buildNP(){
+  document.getElementById('npgrid').innerHTML=['1','2','3','4','5','6','7','8','9','CLR','0','⌫'].map(k=>
+    `<button class="nb ${k==='CLR'?'clr':k==='⌫'?'del':''}" onclick="np('${k}')">${k}</button>`
+  ).join('');
+}
+function np(k){
+  if(k==='CLR') cashStr='';
+  else if(k==='⌫') cashStr=cashStr.slice(0,-1);
+  else if(cashStr.length<8) cashStr+=k;
+  document.getElementById('cval').textContent=cashStr?parseFloat(cashStr).toFixed(2):'0.00';
+  updChg();
+}
+
+function adjP(d){ prsns=Math.max(1,Math.min(99,prsns+d)); document.getElementById('pval').value=prsns; }
+function setTyp(t){
+  ordTyp=t;
+  ['otDine','otTake','otDel'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',['dine','take','del'][i]===t));
+}
+function setPM(m){
+  payM=m;
+  document.getElementById('pmCash').classList.toggle('active',m==='cash');
+  document.getElementById('pmEwl').classList.toggle('active',m==='ewl');
+  document.getElementById('pmCard').classList.toggle('active',m==='card');
+  document.getElementById('npblk').style.opacity=m==='cash'?'1':'0.4';
+  updChg();
+}
+function clrOrd(){
+  cart=[]; cashStr=''; discPct=0;
+  document.getElementById('cval').textContent='0.00';
+  document.getElementById('chrow').textContent='';
+  const db=document.getElementById('discBtn');
+  db.classList.remove('disc-on'); db.textContent='🏷 Discount';
+  renderOrd(); renderMenu();
+  notify('🗑 Order cleared');
+}
+
+function openDiscModal(){
+  if(!cart.length){ notify('⚠ Add items first','','warn'); return; }
+  selDiscPct=discPct;
+  document.querySelectorAll('.disc-opt').forEach(el=>el.classList.toggle('active',parseInt(el.dataset.pct)===selDiscPct));
+  document.getElementById('discModal').classList.add('open');
+}
+function closeDiscModal(){ document.getElementById('discModal').classList.remove('open'); }
+function selectDisc(el){
+  document.querySelectorAll('.disc-opt').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); selDiscPct=parseInt(el.dataset.pct);
+}
+function applyDisc(){
+  discPct=selDiscPct; closeDiscModal(); calcTot();
+  const db=document.getElementById('discBtn');
+  if(discPct>0){ db.classList.add('disc-on'); db.textContent=`🏷 ${discPct}% OFF`; notify(`🏷 ${discPct}% discount applied!`); }
+  else { db.classList.remove('disc-on'); db.textContent='🏷 Discount'; notify('Discount removed'); }
+}
+
+function pay(){
+  if(!cart.length) return;
+  const{sub,disc,vat,tot}=getTots();
+  const cash=parseFloat(cashStr)||0;
+  if(payM==='cash'&&cash>0&&cash<tot){ notify('⚠ Insufficient cash!','','err'); return; }
+  const chg=(payM==='cash'&&cash>0)?cash-tot:0;
+  const num=String(ordN).padStart(3,'0');
+  const cust=document.getElementById('cname').value.trim()||'Guest';
+  document.getElementById('msub').textContent=`Thank you, ${cust}! 🎉`;
+  document.getElementById('mrows').innerHTML=`
+    <div class="mr"><span>Order #</span><span>${num}</span></div>
+    <div class="mr"><span>Customer</span><span>${cust}</span></div>
+    <div class="mr"><span>Type</span><span>${{dine:'Dine In',take:'Take Out',del:'Delivery'}[ordTyp]}</span></div>
+    <div class="mr"><span>Items</span><span>${cart.reduce((s,o)=>s+o.qty,0)} pcs</span></div>
+    <div class="mr"><span>Payment</span><span>${{cash:'Cash 💵',ewl:'E-Wallet 📱',card:'Card 💳'}[payM]}</span></div>
+    ${disc>0?`<div class="mr"><span>Discount (${discPct}%)</span><span>-₱${disc.toFixed(2)}</span></div>`:''}
+    <div class="mr"><span>VAT (12%)</span><span>₱${vat.toFixed(2)}</span></div>
+    <div class="mr"><span>Total</span><span>₱${tot.toFixed(2)}</span></div>
+    ${chg>0?`<div class="mr"><span>Change</span><span>₱${chg.toFixed(2)}</span></div>`:''}
+  `;
+  document.getElementById('modal').classList.add('open');
+  try{
+    const orders=JSON.parse(localStorage.getItem('triad_pos_orders')||'[]');
+    orders.unshift({num,cust,tot,disc,vat,chg,items:cart.map(o=>({name:o.name,qty:o.qty,price:o.price,cat:o.cat})),type:ordTyp,payment:payM,discPct,timestamp:Date.now()});
+    localStorage.setItem('triad_pos_orders',JSON.stringify(orders.slice(0,200)));
+  }catch(e){}
+  ordN++;
+  document.getElementById('onum').textContent=`#${String(ordN).padStart(3,'0')}`;
+}
+function closeM(){
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('cname').value='';
+  prsns=1; document.getElementById('pval').value=1;
+  clrOrd();
+}
+function printAfterPay(){ notify('🖨 Sending to printer…'); }
+function printR(){ if(!cart.length){notify('⚠ Cart is empty','','warn');return;} notify('🖨 Sending to printer…'); }
+function notify(msg,_u='',type=''){
+  const el=document.getElementById('notif');
+  document.getElementById('ntxt').textContent=msg;
+  el.className='notif'+(type==='err'?' err':type==='warn'?' warn':'')+' show';
+  setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+document.addEventListener('keydown',e=>{
+  const inInp=['INPUT','TEXTAREA'].includes(document.activeElement.tagName);
+  const mOpen=document.getElementById('modal').classList.contains('open');
+  const dOpen=document.getElementById('discModal').classList.contains('open');
+  if(mOpen){if(e.key==='Enter'||e.key==='Escape'){closeM();e.preventDefault();}return;}
+  if(dOpen){if(e.key==='Escape'){closeDiscModal();e.preventDefault();}return;}
+  if(!inInp&&e.key>='0'&&e.key<='9'){np(e.key);return;}
+  if(!inInp&&e.key==='Backspace'){np('⌫');e.preventDefault();return;}
+  if(!inInp&&e.key==='Delete'){np('CLR');e.preventDefault();return;}
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+    e.preventDefault();
+    const cols=Math.floor(document.getElementById('mgrid').offsetWidth/164)||4;
+    const len=filt.length; if(!len) return;
+    if(focIdx<0) focIdx=0;
+    else{
+      if(e.key==='ArrowRight') focIdx=Math.min(focIdx+1,len-1);
+      if(e.key==='ArrowLeft')  focIdx=Math.max(focIdx-1,0);
+      if(e.key==='ArrowDown')  focIdx=Math.min(focIdx+cols,len-1);
+      if(e.key==='ArrowUp')    focIdx=Math.max(focIdx-cols,0);
+    }
+    renderMenu(true); return;
+  }
+  if(e.key==='Enter'&&!inInp){if(focIdx>=0&&filt[focIdx]) addItem(filt[focIdx].id); else pay(); e.preventDefault(); return;}
+  if(e.key==='F1'){e.preventDefault();pay();}
+  if(e.key==='F2'){e.preventDefault();clrOrd();}
+  if(e.key==='F3'){e.preventDefault();openDiscModal();}
+  if(e.key==='F4'){e.preventDefault();printR();}
+  if(e.key==='Escape'){focIdx=-1;renderMenu(true);}
+  if(e.key==='Tab'&&!inInp){e.preventDefault();const ci=CATS.indexOf(aCat);setCat(CATS[e.shiftKey?(ci-1+CATS.length)%CATS.length:(ci+1)%CATS.length]);}
+  if(e.key==='/'&&!inInp){e.preventDefault();document.getElementById('srch').focus();}
+  if((e.key==='+'||e.key==='=')&&!inInp&&cart.length) adjQ(cart[cart.length-1].id,1);
+  if(e.key==='-'&&!inInp&&cart.length) adjQ(cart[cart.length-1].id,-1);
+});
+
+init();
+</script>
+</body>
+</html>
